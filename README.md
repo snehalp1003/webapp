@@ -1,2 +1,2 @@
 # webapp
-Web Application for CSYE 6225
+Backend Application for CSYE 6225
