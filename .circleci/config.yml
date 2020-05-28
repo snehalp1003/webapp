@@ -1,0 +1,15 @@
+version: 2.1
+jobs:
+  build:
+    working_directory: ~/webapp
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - run:
+         name: Build WAR
+         command: |
+           pwd
+           ls -al
+           ./mvnw clean install
+           ./mvnw spring-boot:run
