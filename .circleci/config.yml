@@ -8,7 +8,6 @@ jobs:
         environment:
         - MYSQL_ROOT_PASSWORD: Snehal100#
         - MYSQL_DATABASE: webapp
-        - MYSQL_PASSWORD: Snehal100#
     steps:
       - checkout
       - run:
