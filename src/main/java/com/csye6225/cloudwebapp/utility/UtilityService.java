@@ -3,6 +3,7 @@
  */
 package com.csye6225.cloudwebapp.utility;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -19,5 +20,16 @@ public class UtilityService {
             output = true;
         }
         return output;
+    }
+    
+    public static String hashPassword(String plainTextPassword){
+        return BCrypt.hashpw(plainTextPassword, BCrypt.gensalt());
+    }
+    
+    public static boolean checkPassword(String plainPassword, String hashedPassword) {
+        if (BCrypt.checkpw(plainPassword, hashedPassword))
+            return true;
+        else
+            return false;
     }
 }
