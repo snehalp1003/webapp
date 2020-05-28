@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 package com.csye6225.cloudwebapp.api.rest;
 
 import java.io.IOException;
@@ -5,8 +8,8 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,27 +27,28 @@ import io.swagger.annotations.ApiResponses;
  */
 
 @RestController
-@RequestMapping("/v1/fetchUserDetails/userEmailAddress/{userEmailAddress}/userPassword/{userPassword}")
-public class FetchUserDetails {
+@RequestMapping("/v1/updatePassword/userEmailAddress/{userEmailAddress}/oldPassword/{oldPassword}/newPassword/{newPassword}")
+public class UpdateUserPassword {
 
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping
-    @ApiOperation(value = "Fetches user details", notes = "Fetches user details")
-    @ApiResponses(value = { 
-            @ApiResponse(code = 200, message = "Fetched user details successfully."),
+    @PutMapping
+    @ApiOperation(value = "Updates user's password", notes = "Updates user's password")
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Updated user's password successfully."),
             @ApiResponse(code = 401, message = "User is Unauthorized to access this method."),
             @ApiResponse(code = 403, message = "Forbidden to access this method."),
             @ApiResponse(code = 404, message = "Requested details not found."),
             @ApiResponse(code = 500, message = "Internal error, not able to perform the operation.") })
-    // Specific method to insert user details
-    public ResponseEntity fetch(
-            @PathVariable(value = "userEmailAddress") String userEmailAddress,
-            @PathVariable(value = "userPassword") String userPassword) throws IOException {
+    // Specific method to update user details
+    public ResponseEntity insertUserDetails(@PathVariable(value = "userEmailAddress") String userEmailAddress,
+            @PathVariable(value = "oldPassword") String oldPassword,
+            @PathVariable(value = "newPassword") String newPassword) throws IOException {
 
         User user = userRepository.findByUserEmailAddress(userEmailAddress);
-        if (user != null && UtilityService.checkPassword(userPassword, user.getUserPassword())) {
+        if (user != null && UtilityService.checkPassword(oldPassword, user.getUserPassword())) {
+            user.setUserPassword(UtilityService.hashPassword(newPassword));
+            userRepository.save(user);
             return new ResponseEntity(user, HttpStatus.OK);
         } else {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
