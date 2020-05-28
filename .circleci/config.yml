@@ -4,6 +4,12 @@ jobs:
     working_directory: ~/webapp
     docker:
       - image: circleci/openjdk:8-jdk
+      - image: circleci/mysql:latest
+        environment:
+        - MYSQL_ROOT_PASSWORD: Snehal100#
+        - MYSQL_DATABASE: webapp
+        - MYSQL_USER: root
+        - MYSQL_PASSWORD: Snehal100#
     steps:
       - checkout
       - run:
