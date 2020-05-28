@@ -9,6 +9,7 @@ jobs:
       - run:
          name: Build WAR
          command: |
+           echo 'This is the delivery pipeline'
            pwd
            ls -al
            ./mvnw clean install
