@@ -8,8 +8,9 @@ jobs:
         environment:
         - MYSQL_ROOT_PASSWORD: Snehal100#
         - MYSQL_DATABASE: webapp
-        - MYSQL_USER: root
         - MYSQL_PASSWORD: Snehal100#
+        ports:
+        - 3306:3306
     steps:
       - checkout
       - run:
