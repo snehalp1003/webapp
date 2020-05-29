@@ -4,6 +4,7 @@ jobs:
     working_directory: ~/webapp
     docker:
       - image: circleci/openjdk:8-jdk
+      - image: circleci/mysql:5.7.30
         environment:
         - MYSQL_ROOT_PASSWORD: Snehal100#
         - MYSQL_DATABASE: webapp
@@ -16,4 +17,4 @@ jobs:
            pwd
            ls -al
            ./mvnw clean install
-           ./mvnw spring-boot:run
+           ./mvnw clean package
