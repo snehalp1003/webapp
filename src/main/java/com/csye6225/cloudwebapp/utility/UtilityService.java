@@ -3,6 +3,9 @@
  */
 package com.csye6225.cloudwebapp.utility;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,5 +34,31 @@ public class UtilityService {
             return true;
         else
             return false;
+    }
+    
+    public static boolean checkIfValidEmail(String email) {
+        boolean output = false;
+        final String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+        output = matcher.matches();
+        return output;
+    }
+    
+    public static boolean checkIfValidBookPrice(Double bookPrice) {
+        boolean output = false;
+        if(bookPrice > 0.00 && bookPrice < 10000) {
+            output = true;
+        }
+        return output;
+    }
+    
+    public static boolean checkIfValidBookQuantity(Long bookQuantity) {
+        boolean output = false;
+        if(bookQuantity > -1 && bookQuantity < 1000) {
+            output = true;
+        }
+        return output;
     }
 }

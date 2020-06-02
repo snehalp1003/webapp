@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.csye6225.cloudwebapp.api.rest;
+package com.csye6225.cloudwebapp.api.rest.user;
 
 import java.io.IOException;
 
@@ -41,17 +41,22 @@ public class UpdateUserPassword {
             @ApiResponse(code = 404, message = "Requested details not found."),
             @ApiResponse(code = 500, message = "Internal error, not able to perform the operation.") })
     // Specific method to update user details
-    public ResponseEntity insertUserDetails(@PathVariable(value = "userEmailAddress") String userEmailAddress,
+    public ResponseEntity updateUserPassword(@PathVariable(value = "userEmailAddress") String userEmailAddress,
             @PathVariable(value = "oldPassword") String oldPassword,
             @PathVariable(value = "newPassword") String newPassword) throws IOException {
 
         User user = userRepository.findByUserEmailAddress(userEmailAddress);
-        if (user != null && UtilityService.checkPassword(oldPassword, user.getUserPassword())) {
-            user.setUserPassword(UtilityService.hashPassword(newPassword));
-            userRepository.save(user);
-            return new ResponseEntity(user, HttpStatus.OK);
+        if (user != null) {
+            if (UtilityService.checkPassword(oldPassword, user.getUserPassword())) {
+                user.setUserPassword(UtilityService.hashPassword(newPassword));
+                userRepository.save(user);
+                return new ResponseEntity(user, HttpStatus.OK);
+            } else {
+                return new ResponseEntity("Incorrect old password !", HttpStatus.UNAUTHORIZED);
+            }
+
         } else {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return new ResponseEntity("User not found !", HttpStatus.NOT_FOUND);
         }
 
     }
