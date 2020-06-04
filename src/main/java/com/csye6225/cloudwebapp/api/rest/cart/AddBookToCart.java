@@ -61,11 +61,11 @@ public class AddBookToCart {
             
             String bookSoldBy = cartItem.getBookSoldBy();
             Book book = bookRepository.findByBookISBNAndBookSoldBy(bookISBN, bookSoldBy);
-            if(book.getBookQuantity() < cartItem.getBookQuantity()) {
+            if(book.getBookQuantity() < 1) {
                 return new ResponseEntity("Requested quantity not available", HttpStatus.NOT_ACCEPTABLE);
             } else {
                 cartRepository.save(cartItem);
-                book.setBookQuantity(book.getBookQuantity() - cartItem.getBookQuantity());
+                book.setBookQuantity(book.getBookQuantity() - 1);
                 book.setBookLastModified(new Date());
                 bookRepository.save(book);
                 return new ResponseEntity(cartItem, HttpStatus.OK);
