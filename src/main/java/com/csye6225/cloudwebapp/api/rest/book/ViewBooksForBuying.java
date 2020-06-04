@@ -26,8 +26,8 @@ import io.swagger.annotations.ApiResponses;
  *
  */
 @RestController
-@RequestMapping("/v1/viewBooks/userLoggedIn/{userLoggedIn}")
-public class ViewBooksAvailable {
+@RequestMapping("/v1/viewBooksForBuying/userLoggedIn/{userLoggedIn}")
+public class ViewBooksForBuying {
 
     @Autowired
     private BookRepository bookRepository;
@@ -35,13 +35,14 @@ public class ViewBooksAvailable {
     @GetMapping
     @ApiOperation(value = "Returns list of available books", notes = "Returns list of available books")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Book details inserted successfully."),
+            @ApiResponse(code = 204, message = "No books available."),
             @ApiResponse(code = 401, message = "User is Unauthorized to access this method."),
             @ApiResponse(code = 403, message = "Forbidden to access this method."),
             @ApiResponse(code = 404, message = "Requested details not found."),
             @ApiResponse(code = 409, message = "Duplicate book entry"),
             @ApiResponse(code = 500, message = "Internal error, not able to perform the operation.") })
     // Specific method to return available books
-    public ResponseEntity viewBooksAvailable(@PathVariable(value = "userLoggedIn") String userLoggedIn)
+    public ResponseEntity viewBooksForBuying(@PathVariable(value = "userLoggedIn") String userLoggedIn)
             throws IOException {
 
         ArrayList<Book> availableBooks = bookRepository.findAll();
@@ -58,7 +59,7 @@ public class ViewBooksAvailable {
         if (returnAvailableBooks != null && returnAvailableBooks.size() > 0) {
             return new ResponseEntity(returnAvailableBooks, HttpStatus.OK);
         } else {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
     }
 }

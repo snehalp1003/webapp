@@ -21,7 +21,6 @@ public class Cart {
     private String bookBoughtBy;
     private String bookISBN;
     private String bookSoldBy;
-    private Long bookQuantity;
     
     public Long getCartItemId() {
         return cartItemId;
@@ -46,11 +45,5 @@ public class Cart {
     }
     public void setBookSoldBy(String bookSoldBy) {
         this.bookSoldBy = bookSoldBy;
-    }
-    public Long getBookQuantity() {
-        return bookQuantity;
-    }
-    public void setBookQuantity(Long bookQuantity) {
-        this.bookQuantity = bookQuantity;
     }
 }

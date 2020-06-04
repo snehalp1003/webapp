@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.csye6225.cloudwebapp.api.model.Book;
 import com.csye6225.cloudwebapp.api.model.Cart;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
 import com.csye6225.cloudwebapp.datasource.repository.CartRepository;
@@ -27,12 +28,15 @@ import io.swagger.annotations.ApiResponses;
  *
  */
 @RestController
-@RequestMapping("/v1/refreshCart/bookBoughtBy/{bookBoughtBy}")
-public class RefreshCart {
-    
+@RequestMapping("/v1/viewCartDetails/bookBoughtBy/{bookBoughtBy}")
+public class ViewCartDetails {
+
+    @Autowired
+    private BookRepository bookRepository;
+
     @Autowired
     private CartRepository cartRepository;
-    
+
     @GetMapping
     @ApiOperation(value = "Returns updated cart for a user", notes = "Returns updated cart for a user")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Updated cart successfully"),
@@ -42,24 +46,25 @@ public class RefreshCart {
             @ApiResponse(code = 409, message = "Duplicate book entry"),
             @ApiResponse(code = 500, message = "Internal error, not able to perform the operation.") })
     // Specific method to return updated cart
-    public ResponseEntity refreshCart(@PathVariable(value = "bookBoughtBy") String bookBoughtBy)
+    public ResponseEntity viewCartDetails(@PathVariable(value = "bookBoughtBy") String bookBoughtBy)
             throws IOException {
 
         ArrayList<Cart> availableCartItems = cartRepository.findAll();
-        
-        ArrayList<Cart> returnUpdatedCartItems = new ArrayList<Cart>();
+
+        ArrayList<Book> returnUpdatedCartItems = new ArrayList<Book>();
         if (availableCartItems != null && availableCartItems.size() > 0) {
             for (Cart cart : availableCartItems) {
                 if (cart.getBookBoughtBy().equals(bookBoughtBy)) {
-                    returnUpdatedCartItems.add(cart);
+                    returnUpdatedCartItems
+                            .add(bookRepository.findByBookISBNAndBookSoldBy(cart.getBookISBN(), cart.getBookSoldBy()));
                 }
             }
         }
-        
+
         if (returnUpdatedCartItems != null && returnUpdatedCartItems.size() > 0) {
             return new ResponseEntity(returnUpdatedCartItems, HttpStatus.OK);
         } else {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
     }
 
