@@ -50,7 +50,7 @@ public class UpdateBookDetails {
             return new ResponseEntity("Cannot update book belonging to another seller !", HttpStatus.FORBIDDEN);
         } else if (bookRepository.findByBookISBNAndBookSoldBy(bookISBN, bookDetails.getBookSoldBy()) != null) {
             Book book = bookRepository.findByBookISBNAndBookSoldBy(bookISBN, bookDetails.getBookSoldBy());
-            book.setBookISBN(bookDetails.getBookISBN());
+            book.setBookISBN(book.getBookISBN());
             book.setBookTitle(bookDetails.getBookTitle());
             book.setBookAuthors(bookDetails.getBookAuthors());
             book.setBookPubDate(bookDetails.getBookPubDate());

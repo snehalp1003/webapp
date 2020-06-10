@@ -27,7 +27,7 @@ public class UtilityService {
     
     public static boolean checkIfValidPassword(String plainTextPassword) {
         boolean output = false;
-        final String passwordRegex = "((?=.*[a-z])(?=.*\\\\d)(?=.*[A-Z])(?=.*[@#$%!]).{8,40})";
+        final String passwordRegex = "((?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[@#$%!]).{8,40})";
         
         Pattern pattern = Pattern.compile(passwordRegex);
         Matcher matcher = pattern.matcher(plainTextPassword);
