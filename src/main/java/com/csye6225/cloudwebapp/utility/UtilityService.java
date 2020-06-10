@@ -25,6 +25,16 @@ public class UtilityService {
         return output;
     }
     
+    public static boolean checkIfValidPassword(String plainTextPassword) {
+        boolean output = false;
+        final String passwordRegex = "((?=.*[a-z])(?=.*\\\\d)(?=.*[A-Z])(?=.*[@#$%!]).{8,40})";
+        
+        Pattern pattern = Pattern.compile(passwordRegex);
+        Matcher matcher = pattern.matcher(plainTextPassword);
+        output = matcher.matches();
+        return output;
+    }
+    
     public static String hashPassword(String plainTextPassword){
         return BCrypt.hashpw(plainTextPassword, BCrypt.gensalt());
     }

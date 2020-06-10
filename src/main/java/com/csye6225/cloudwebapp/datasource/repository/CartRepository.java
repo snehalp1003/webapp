@@ -22,6 +22,8 @@ public interface CartRepository extends CrudRepository<Cart, Integer> {
      */
     Cart findByBookBoughtByAndBookISBN(String bookBoughtBy, String bookISBN);
     
+    ArrayList<Cart> findByBookSoldByAndBookISBN(String bookSoldBy, String BookISBN);
+    
     ArrayList<Cart> findAll();
     
     

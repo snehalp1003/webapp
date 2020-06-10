@@ -4,6 +4,7 @@
 package com.csye6225.cloudwebapp.api.rest.book;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.csye6225.cloudwebapp.api.model.Book;
+import com.csye6225.cloudwebapp.api.model.Cart;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
+import com.csye6225.cloudwebapp.datasource.repository.CartRepository;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -31,6 +34,9 @@ public class DeleteBook {
 
     @Autowired
     private BookRepository bookRepository;
+    
+    @Autowired
+    private CartRepository cartRepository;
     
     @DeleteMapping
     @ApiOperation(value = "Deletes book entry specified", notes = "Deletes book entry specified")
@@ -49,6 +55,14 @@ public class DeleteBook {
         } else if (bookRepository.findByBookISBNAndBookSoldBy(bookISBN, bookSoldBy) != null) {
             Book book = bookRepository.findByBookISBNAndBookSoldBy(bookISBN, bookSoldBy);
             bookRepository.delete(book);
+            
+            if (cartRepository.findByBookSoldByAndBookISBN(bookSoldBy, bookISBN) != null) {
+                ArrayList<Cart> bookToDeleteInCart = cartRepository.findByBookSoldByAndBookISBN(bookSoldBy, bookISBN);
+                
+                for (Cart bookInCart : bookToDeleteInCart) {
+                    cartRepository.delete(bookInCart);
+                }
+            }
 
             return new ResponseEntity(HttpStatus.OK);
         } else {

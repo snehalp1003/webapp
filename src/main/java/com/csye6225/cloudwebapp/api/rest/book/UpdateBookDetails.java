@@ -56,8 +56,8 @@ public class UpdateBookDetails {
             book.setBookPubDate(bookDetails.getBookPubDate());
             book.setBookQuantity(bookDetails.getBookQuantity());
             book.setBookPrice(bookDetails.getBookPrice());
-            book.setBookSoldBy(bookDetails.getBookSoldBy());
-            book.setBookAdded(bookDetails.getBookAdded());
+            book.setBookSoldBy(book.getBookSoldBy());
+            book.setBookAdded(book.getBookAdded());
             book.setBookLastModified(new Date());
             bookRepository.save(book);
             
