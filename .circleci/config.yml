@@ -18,3 +18,4 @@ jobs:
            ls -al
            ./mvnw clean install
            ./mvnw clean package
+           ./mvnw clean test

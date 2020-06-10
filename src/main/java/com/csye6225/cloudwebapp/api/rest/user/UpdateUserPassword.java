@@ -36,6 +36,7 @@ public class UpdateUserPassword {
     @PutMapping
     @ApiOperation(value = "Updates user's password", notes = "Updates user's password")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Updated user's password successfully."),
+            @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 401, message = "User is Unauthorized to access this method."),
             @ApiResponse(code = 403, message = "Forbidden to access this method."),
             @ApiResponse(code = 404, message = "Requested details not found."),
@@ -48,9 +49,13 @@ public class UpdateUserPassword {
         User user = userRepository.findByUserEmailAddress(userEmailAddress);
         if (user != null) {
             if (UtilityService.checkPassword(oldPassword, user.getUserPassword())) {
-                user.setUserPassword(UtilityService.hashPassword(newPassword));
-                userRepository.save(user);
-                return new ResponseEntity(user, HttpStatus.OK);
+                if (UtilityService.checkIfValidPassword(newPassword)) {
+                    user.setUserPassword(UtilityService.hashPassword(newPassword));
+                    userRepository.save(user);
+                    return new ResponseEntity(user, HttpStatus.OK);
+                } else {
+                    return new ResponseEntity("Password in incorrect format !", HttpStatus.BAD_REQUEST);
+                }
             } else {
                 return new ResponseEntity("Incorrect old password !", HttpStatus.UNAUTHORIZED);
             }

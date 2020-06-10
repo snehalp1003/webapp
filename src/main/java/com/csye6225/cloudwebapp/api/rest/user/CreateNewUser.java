@@ -45,7 +45,7 @@ public class CreateNewUser {
         } else if (UtilityService.checkStringNotNull(userEmailAddress)
                 && UtilityService.checkStringNotNull(userFirstName) && UtilityService.checkStringNotNull(userLastName)
                 && UtilityService.checkStringNotNull(userPassword)) {
-            if (UtilityService.checkIfValidEmail(userEmailAddress)) {
+            if (UtilityService.checkIfValidEmail(userEmailAddress) && UtilityService.checkIfValidPassword(userPassword)) {
                 User user = new User();
                 user.setUserEmailAddress(userEmailAddress);
                 user.setUserPassword(UtilityService.hashPassword(userPassword));
@@ -54,7 +54,7 @@ public class CreateNewUser {
                 userRepository.save(user);
                 return new ResponseEntity(user, HttpStatus.OK);
             } else {
-                return new ResponseEntity("Email Address in incorrect format", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity("Email Address or password in incorrect format !", HttpStatus.BAD_REQUEST);
             }
         } else {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
