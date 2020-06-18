@@ -34,7 +34,7 @@ public class ViewBooksForSelling {
 
     @GetMapping
     @ApiOperation(value = "Returns list of available books", notes = "Returns list of available books")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "Book details inserted successfully."),
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Returns list of available books."),
             @ApiResponse(code = 204, message = "No books available."),
             @ApiResponse(code = 401, message = "User is Unauthorized to access this method."),
             @ApiResponse(code = 403, message = "Forbidden to access this method."),
