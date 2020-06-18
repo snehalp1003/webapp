@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.csye6225.cloudwebapp.api.model.Book;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
+import com.csye6225.cloudwebapp.utility.UtilityService;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -40,6 +41,7 @@ public class UpdateBookDetails {
             @ApiResponse(code = 401, message = "User is Unauthorized to access this method."),
             @ApiResponse(code = 403, message = "Forbidden to access this method."),
             @ApiResponse(code = 404, message = "Requested details not found."),
+            @ApiResponse(code = 406, message = "Invalid book quantity or book price."),
             @ApiResponse(code = 500, message = "Internal error, not able to perform the operation.") })
     // Specific method to update book details
     public ResponseEntity updateBookDetails(@PathVariable(value = "bookISBN") String bookISBN,
@@ -50,18 +52,23 @@ public class UpdateBookDetails {
             return new ResponseEntity("Cannot update book belonging to another seller !", HttpStatus.FORBIDDEN);
         } else if (bookRepository.findByBookISBNAndBookSoldBy(bookISBN, bookDetails.getBookSoldBy()) != null) {
             Book book = bookRepository.findByBookISBNAndBookSoldBy(bookISBN, bookDetails.getBookSoldBy());
-            book.setBookISBN(book.getBookISBN());
-            book.setBookTitle(bookDetails.getBookTitle());
-            book.setBookAuthors(bookDetails.getBookAuthors());
-            book.setBookPubDate(bookDetails.getBookPubDate());
-            book.setBookQuantity(bookDetails.getBookQuantity());
-            book.setBookPrice(bookDetails.getBookPrice());
-            book.setBookSoldBy(book.getBookSoldBy());
-            book.setBookAdded(book.getBookAdded());
-            book.setBookLastModified(new Date());
-            bookRepository.save(book);
-            
-            return new ResponseEntity(book, HttpStatus.OK);
+            if (UtilityService.checkIfValidBookPrice(bookDetails.getBookPrice())
+                    && UtilityService.checkIfValidBookQuantity(bookDetails.getBookQuantity())) {
+                book.setBookISBN(book.getBookISBN());
+                book.setBookTitle(bookDetails.getBookTitle());
+                book.setBookAuthors(bookDetails.getBookAuthors());
+                book.setBookPubDate(bookDetails.getBookPubDate());
+                book.setBookQuantity(bookDetails.getBookQuantity());
+                book.setBookPrice(bookDetails.getBookPrice());
+                book.setBookSoldBy(book.getBookSoldBy());
+                book.setBookAdded(book.getBookAdded());
+                book.setBookLastModified(new Date());
+                bookRepository.save(book);
+                
+                return new ResponseEntity(book, HttpStatus.OK);
+            } else {
+                return new ResponseEntity("Invalid book quantity or book price",HttpStatus.NOT_ACCEPTABLE);
+            }
         } else {
             return new ResponseEntity("Book not found !", HttpStatus.NOT_FOUND);
         }
