@@ -63,7 +63,7 @@ jobs:
             echo "current directory content"
             ls -al
             echo "Copying the properties from /webapp/src/main/resources to the webapp_artifact"
-            cp ../webapp/src/main/resources/*.* .
+            cp ../src/main/resources/*.* .
             echo "Zipping all files in the webapp_artifact directory"
             zip -r webapp-${CIRCLE_BUILD_NUM}.zip .
             echo "Removing the files except for the zip file from the directory"
