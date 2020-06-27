@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,9 +29,9 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.csye6225.cloudwebapp.JPAConfig;
 import com.csye6225.cloudwebapp.api.model.Image;
 import com.csye6225.cloudwebapp.datasource.repository.ImageRepository;
-import com.csye6225.cloudwebapp.utility.Constants;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -45,16 +46,23 @@ import io.swagger.annotations.ApiResponses;
 @RequestMapping("/v1/uploadImageToS3/bookISBN/{bookISBN}/bookSoldBy/{bookSoldBy}")
 public class InsertImageToS3 {
     
-    private AmazonS3 amazonS3;
     private static final Logger logger = LoggerFactory.getLogger(InsertImageToS3.class);
 
     @Autowired
     private ImageRepository imageRepository;
     
-    @PostConstruct
-    private void initializeAmazon() {
-        this.amazonS3 = new AmazonS3Client(new BasicAWSCredentials(Constants.ACCESS_KEY_ID, Constants.SECRET_KEY));
-    }
+    @Autowired
+    private AmazonS3 amazonS3;
+    
+    @Value("${BUCKET_NAME}")
+    private String bucketName;
+    
+//    private String bucketName = "webapp.snehal.patel";
+    
+    @Value("${BUCKET_URL}")
+    private String bucketUrl;
+    
+//    private String bucketUrl = "https://s3.us-east-1.amazonaws.com";
 
     @PostMapping
     @ApiOperation(value = "Inserts image to S3", notes = "Inserts image to S3")
@@ -76,9 +84,9 @@ public class InsertImageToS3 {
         try {
             File file = convertMultiPartToFile(multipartFile);
             String fileNameWithDate = new Date().getTime()+"-"+fileName.replace(" ", "_");
-            fileUrl = Constants.ENDPOINT_URL+"/"+Constants.BUCKET_NAME+"/"+fileNameWithDate;
+            fileUrl = bucketUrl+"/"+bucketName+"/"+fileNameWithDate;
 
-            PutObjectRequest putObjectRequest = new PutObjectRequest(Constants.BUCKET_NAME, fileNameWithDate, file);
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, fileNameWithDate, file);
             putObjectRequest.withCannedAcl(CannedAccessControlList.PublicRead);
 
             this.amazonS3.putObject(putObjectRequest);
