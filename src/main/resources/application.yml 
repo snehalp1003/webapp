@@ -1,5 +1,0 @@
-amazonProperties:
-  endpointUrl: https://s3.us-east-1.amazonaws.com
-  accessKey: AKIAIGJDIIDOLZX56DJQ
-  secretKey: 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
-  bucketName: webapp.snehal.patel

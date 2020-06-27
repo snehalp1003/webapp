@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  build:
+  pr_check:
     working_directory: ~/webapp
     docker:
       - image: circleci/openjdk:8-jdk
@@ -10,11 +10,93 @@ jobs:
     steps:
       - checkout
       - run:
-         name: Build WAR
+         name: Maven build & test
          command: |
            echo 'This is the delivery pipeline'
            pwd
            ls -al
-           ./mvnw clean install
-           ./mvnw clean package
-           ./mvnw clean test
+           mvn clean install
+           mvn clean test
+  build:
+    docker:
+      - image: circleci/openjdk:8-jdk
+        environment:
+        - MYSQL_ROOT_PASSWORD: Snehal100#
+        - MYSQL_DATABASE: webapp
+    steps:
+      - checkout
+      - run:
+         name: Install packages
+         command: |
+           sudo apt-get update && sudo apt-get install wget zip unzip python-pip python-dev build-essential -y
+           python --version
+      - run:
+          name: Install awscli
+          command: sudo pip install awscli
+      - run:
+          name: Build Artifact
+          command: |
+            ls -al
+            echo "Building the artifact with Maven"
+            cd webapp/ && mvn clean install
+            cd target
+            ls -al
+            cd ../..
+      - run:
+          name: Zip Artifact
+          command: |
+            echo "Current build number is ${CIRCLE_BUILD_NUM}"
+            echo "Current directory"
+            pwd
+            echo "Current directory content"
+            ls -al
+            echo "Making the webapp_artifact directory"
+            mkdir -p webapp_artifact
+            echo "Changing directory to webapp_artifact"
+            cd webapp_artifact
+            echo "Copying all .sh files to webapp_artifact"
+            cp ../codedeploy/*.sh .
+            echo "Copying all .yml files to webapp_artifact"
+            cp ../*.yml .
+            echo "Copying the jar file from ../target/demo-0.0.1-SNAPSHOT.jar to the webapp_artifact"
+            cp ../webapp/target/webapp-0.0.1-SNAPSHOT.jar .
+            echo "current directory content"
+            ls -al
+            echo "Copying the properties from /webapp/src/main/resources to the webapp_artifact"
+            cp ../webapp/src/main/resources/*.* .
+            echo "Zipping all files in the webapp_artifact directory"
+            zip -r webapp-${CIRCLE_BUILD_NUM}.zip .
+            echo "Removing the files except for the zip file from the directory"
+            rm *.yml *.sh *.jar *.properties *.json *.xml
+            ls -al
+            pwd
+            echo "Changing directory to root"
+            cd ..
+            pwd
+            ls -al
+      - run:
+          name: Upload Artifact to S3 Bucket
+          command: |
+            echo "Uploading artifact to S3 bucket ${CODE_DEPLOY_S3_BUCKET}"
+            cd artifact
+            aws s3 cp webapp-${CIRCLE_BUILD_NUM}.zip s3://${CODE_DEPLOY_S3_BUCKET}
+            cd ..
+      - run:
+          name: Deploy artifact on EC2
+          command: |
+            aws configure set region ${AWS_REGION}
+            echo "Deploying artifact on EC2 instance via codedeploy agent"
+            aws deploy create-deployment --application-name "csye6225-webapp" --deployment-group-name "csye6225-webapp-deployment" --s3-location bucket=${CODE_DEPLOY_S3_BUCKET},bundleType=zip,key=webapp-${CIRCLE_BUILD_NUM}.zip
+
+workflows:
+  version: 2
+  pr-check-workflow:
+    jobs:
+    - pr_check
+  build_deploy-workflow:
+    jobs:
+    - build:
+          filters:
+            branches:
+              only:
+                - master
