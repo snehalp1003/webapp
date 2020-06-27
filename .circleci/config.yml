@@ -58,8 +58,8 @@ jobs:
             cp ../codedeploy/*.sh .
             echo "Copying all .yml files to webapp_artifact"
             cp ../*.yml .
-            echo "Copying the jar file from ../target/demo-0.0.1-SNAPSHOT.jar to the webapp_artifact"
-            cp ../webapp/target/webapp-0.0.1-SNAPSHOT.jar .
+            echo "Copying the jar file from ../target/cloudwebapp-0.0.1-SNAPSHOT.jar to the webapp_artifact"
+            cp ../webapp/target/cloudwebapp-0.0.1-SNAPSHOT.jar .
             echo "current directory content"
             ls -al
             echo "Copying the properties from /webapp/src/main/resources to the webapp_artifact"
