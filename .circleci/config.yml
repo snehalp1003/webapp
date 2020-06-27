@@ -38,7 +38,7 @@ jobs:
           command: |
             ls -al
             echo "Building the artifact with Maven"
-            cd webapp/ && mvn clean install
+            mvn clean install
             cd target
             ls -al
             cd ../..
