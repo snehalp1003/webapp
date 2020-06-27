@@ -67,7 +67,7 @@ jobs:
             echo "Zipping all files in the webapp_artifact directory"
             zip -r webapp-${CIRCLE_BUILD_NUM}.zip .
             echo "Removing the files except for the zip file from the directory"
-            rm *.yml *.sh *.jar *.properties *.json *.xml
+            rm *.yml *.sh *.jar *.properties
             ls -al
             pwd
             echo "Changing directory to root"
