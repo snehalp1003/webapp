@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.csye6225</groupId>
-	<artifactId>cloud-webapp</artifactId>
+	<artifactId>cloudwebapp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>cloud-webapp</name>
+	<name>cloudwebapp</name>
 	<description>Project for CSYE 6225</description>
 
 	<properties>
