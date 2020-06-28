@@ -61,7 +61,7 @@ public class DeleteBook {
             @ApiResponse(code = 403, message = "Forbidden to access this method."),
             @ApiResponse(code = 404, message = "Requested details not found."),
             @ApiResponse(code = 500, message = "Internal error, not able to perform the operation.") })
-    // Specific method to insert book details
+    // Specific method to delete book details
     public ResponseEntity deleteBook(@PathVariable(value = "bookISBN") String bookISBN,
             @PathVariable(value = "bookSoldBy") String bookSoldBy,
             @PathVariable(value = "userLoggedIn") String userLoggedIn) throws IOException {
