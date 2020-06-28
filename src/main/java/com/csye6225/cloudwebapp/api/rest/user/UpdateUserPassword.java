@@ -41,7 +41,7 @@ public class UpdateUserPassword {
             @ApiResponse(code = 403, message = "Forbidden to access this method."),
             @ApiResponse(code = 404, message = "Requested details not found."),
             @ApiResponse(code = 500, message = "Internal error, not able to perform the operation.") })
-    // Specific method to update user details
+    // Specific method to update password
     public ResponseEntity updateUserPassword(@PathVariable(value = "userEmailAddress") String userEmailAddress,
             @PathVariable(value = "oldPassword") String oldPassword,
             @PathVariable(value = "newPassword") String newPassword) throws IOException {

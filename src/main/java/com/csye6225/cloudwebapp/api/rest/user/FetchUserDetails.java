@@ -38,7 +38,7 @@ public class FetchUserDetails {
             @ApiResponse(code = 403, message = "Forbidden to access this method."),
             @ApiResponse(code = 404, message = "Requested details not found."),
             @ApiResponse(code = 500, message = "Internal error, not able to perform the operation.") })
-    // Specific method to insert user details
+    // Specific method to fetch user details
     public ResponseEntity fetchUserDetails(
             @PathVariable(value = "userEmailAddress") String userEmailAddress,
             @PathVariable(value = "userPassword") String userPassword) throws IOException {
