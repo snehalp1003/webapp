@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,10 +16,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.csye6225.cloudwebapp.api.model.Book;
 import com.csye6225.cloudwebapp.api.model.Cart;
+import com.csye6225.cloudwebapp.api.model.Image;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
 import com.csye6225.cloudwebapp.datasource.repository.CartRepository;
+import com.csye6225.cloudwebapp.datasource.repository.ImageRepository;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -37,6 +42,17 @@ public class DeleteBook {
     
     @Autowired
     private CartRepository cartRepository;
+    
+    @Autowired
+    private ImageRepository imageRepository;
+    
+    @Autowired
+    private AmazonS3 amazonS3;
+    
+    @Value("${BUCKET_NAME}")
+    private String bucketName;
+    
+//    private String bucketName = "webapp.snehal.patel";
     
     @DeleteMapping
     @ApiOperation(value = "Deletes book entry specified", notes = "Deletes book entry specified")
@@ -63,6 +79,19 @@ public class DeleteBook {
                     cartRepository.delete(bookInCart);
                 }
             }
+            
+            ArrayList<Image> imagesInRepository = imageRepository.findAll();
+            
+            if(imagesInRepository != null && imagesInRepository.size() > 0) {
+                for (Image image : imagesInRepository) {
+                    if(image.getBookISBN().equals(bookISBN) && image.getBookSoldBy().equals(bookSoldBy)) {
+                        amazonS3.deleteObject(new DeleteObjectRequest(bucketName, image.getImageName()));
+
+                        imageRepository.delete(image);
+                    }
+                }
+            }
+            
 
             return new ResponseEntity(HttpStatus.OK);
         } else {
