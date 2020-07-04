@@ -28,8 +28,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.csye6225.cloudwebapp.JPAConfig;
@@ -54,8 +56,11 @@ public class FetchImagesFromS3 {
     @Autowired
     private ImageRepository imageRepository;
     
-    @Autowired
-    private AmazonS3 amazonS3;
+//    @Autowired
+//    private AmazonS3 amazonS3;
+    private AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
+            .withCredentials(new InstanceProfileCredentialsProvider(true))
+            .build();
     
     @Value("${BUCKET_NAME}")
     private String bucketName;

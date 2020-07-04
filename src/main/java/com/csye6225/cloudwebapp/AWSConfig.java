@@ -20,8 +20,8 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
  * @author Snehal Patel
  *
  */
-@Configuration
-public class AWSConfig {
+//@Configuration
+//public class AWSConfig {
 
 //    @Value("${AWS_ACCESS_KEY_ID}")
 //    private String accessKeyId;
@@ -33,8 +33,8 @@ public class AWSConfig {
     
 //    private String secretKey = "lxXw3FGZBLHrUw5o/hbED0jixnBYDdE+wx1gyjWM";
 
-    @Value("${AWS_REGION}")
-    private String region;
+//    @Value("${AWS_REGION}")
+//    private String region;
     
 //    private String region = "us-east-1";
 
@@ -43,15 +43,15 @@ public class AWSConfig {
 //        return new BasicAWSCredentials(accessKeyId, secretKey);
 //    }
 
-    @Bean
-    public AmazonS3 amazonS3() {
-        AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-                .withCredentials(new InstanceProfileCredentialsProvider(true))
-                .withRegion(Regions.fromName(region))
-                .build();
+//    @Bean
+//    public AmazonS3 amazonS3() {
+//        AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+//                .withCredentials(new InstanceProfileCredentialsProvider(true))
+//                .withRegion(Regions.fromName(region))
+//                .build();
 //        AmazonS3Client amazonS3Client = (AmazonS3Client) AmazonS3ClientBuilder.standard().withCredentials(new InstanceProfileCredentialsProvider(true)).build();
 //        AmazonS3Client amazonS3Client = new AmazonS3Client(awsCredentials);
 //        amazonS3Client.setRegion(Region.getRegion(Regions.fromName(region)));
-        return s3Client;
-    }
-}
+//        return s3Client;
+//    }
+//}
