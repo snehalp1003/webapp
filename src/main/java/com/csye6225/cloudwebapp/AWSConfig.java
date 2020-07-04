@@ -9,9 +9,11 @@ import org.springframework.context.annotation.Configuration;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 /**
  * @author Snehal Patel
@@ -20,13 +22,13 @@ import com.amazonaws.services.s3.AmazonS3Client;
 @Configuration
 public class AWSConfig {
 
-    @Value("${AWS_ACCESS_KEY_ID}")
-    private String accessKeyId;
+//    @Value("${AWS_ACCESS_KEY_ID}")
+//    private String accessKeyId;
     
 //    private String accessKeyId = "AKIAIGJDIIDOLZX56DJQ";
     
-    @Value("${AWS_SECRET_ACCESS_KEY}")
-    private String secretKey;
+//    @Value("${AWS_SECRET_ACCESS_KEY}")
+//    private String secretKey;
     
 //    private String secretKey = "lxXw3FGZBLHrUw5o/hbED0jixnBYDdE+wx1gyjWM";
 
@@ -35,14 +37,15 @@ public class AWSConfig {
     
 //    private String region = "us-east-1";
 
-    @Bean
-    public BasicAWSCredentials basicAWSCredentials() {
-        return new BasicAWSCredentials(accessKeyId, secretKey);
-    }
+//    @Bean
+//    public BasicAWSCredentials basicAWSCredentials() {
+//        return new BasicAWSCredentials(accessKeyId, secretKey);
+//    }
 
     @Bean
-    public AmazonS3Client amazonS3Client(AWSCredentials awsCredentials) {
-        AmazonS3Client amazonS3Client = new AmazonS3Client(awsCredentials);
+    public AmazonS3Client amazonS3Client() {
+        AmazonS3Client amazonS3Client = (AmazonS3Client) AmazonS3ClientBuilder.standard().withCredentials(new InstanceProfileCredentialsProvider(true)).build();
+//        AmazonS3Client amazonS3Client = new AmazonS3Client(awsCredentials);
         amazonS3Client.setRegion(Region.getRegion(Regions.fromName(region)));
         return amazonS3Client;
     }
