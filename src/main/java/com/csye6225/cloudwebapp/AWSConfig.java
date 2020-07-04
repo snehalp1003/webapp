@@ -12,6 +12,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
@@ -43,10 +44,14 @@ public class AWSConfig {
 //    }
 
     @Bean
-    public AmazonS3Client amazonS3Client() {
-        AmazonS3Client amazonS3Client = (AmazonS3Client) AmazonS3ClientBuilder.standard().withCredentials(new InstanceProfileCredentialsProvider(true)).build();
+    public AmazonS3 amazonS3() {
+        AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+                .withCredentials(new InstanceProfileCredentialsProvider(true))
+                .withRegion(Regions.fromName(region))
+                .build();
+//        AmazonS3Client amazonS3Client = (AmazonS3Client) AmazonS3ClientBuilder.standard().withCredentials(new InstanceProfileCredentialsProvider(true)).build();
 //        AmazonS3Client amazonS3Client = new AmazonS3Client(awsCredentials);
-        amazonS3Client.setRegion(Region.getRegion(Regions.fromName(region)));
-        return amazonS3Client;
+//        amazonS3Client.setRegion(Region.getRegion(Regions.fromName(region)));
+        return s3Client;
     }
 }
