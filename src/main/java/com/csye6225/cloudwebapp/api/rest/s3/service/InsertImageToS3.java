@@ -25,8 +25,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.csye6225.cloudwebapp.JPAConfig;
@@ -51,8 +54,11 @@ public class InsertImageToS3 {
     @Autowired
     private ImageRepository imageRepository;
     
-    @Autowired
-    private AmazonS3 amazonS3;
+//    @Autowired
+//    private AmazonS3 amazonS3;
+    private AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
+            .withCredentials(new InstanceProfileCredentialsProvider(true))
+            .build();
     
     @Value("${BUCKET_NAME}")
     private String bucketName;
@@ -98,12 +104,12 @@ public class InsertImageToS3 {
             img.setBookAdded(new Date());
             
             imageRepository.save(img);
+            return new ResponseEntity("Image inserted to S3 bucket successfully", HttpStatus.OK);
             
         } catch (IOException | AmazonServiceException ex) {
             logger.error("error [" + ex.getMessage() + "] occurred while uploading [" + fileName + "] ");
+            return new ResponseEntity("Error inserting image to S3", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        
-        return new ResponseEntity("Image inserted to S3 bucket successfully", HttpStatus.OK);
     }
     
     private File convertMultiPartToFile(MultipartFile file) throws IOException {

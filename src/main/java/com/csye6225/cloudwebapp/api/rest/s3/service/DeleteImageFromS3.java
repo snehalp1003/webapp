@@ -21,10 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.csye6225.cloudwebapp.AWSConfig;
 import com.csye6225.cloudwebapp.JPAConfig;
 import com.csye6225.cloudwebapp.api.model.Book;
 import com.csye6225.cloudwebapp.api.model.Cart;
@@ -48,8 +49,11 @@ public class DeleteImageFromS3 {
     @Autowired
     private ImageRepository imageRepository;
     
-    @Autowired
-    private AmazonS3 amazonS3;
+//    @Autowired
+//    private AmazonS3 amazonS3;
+    private AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
+            .withCredentials(new InstanceProfileCredentialsProvider(true))
+            .build();
     
     @Value("${BUCKET_NAME}")
     private String bucketName;
