@@ -6,11 +6,12 @@ package com.csye6225.cloudwebapp.api.rest.book;
 import java.io.IOException;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +32,8 @@ import io.swagger.annotations.ApiResponses;
 @RestController
 @RequestMapping("/v1/updateBookDetails/bookISBN/{bookISBN}/bookSoldBy/{bookSoldBy}/userLoggedIn/{userLoggedIn}")
 public class UpdateBookDetails {
+    
+    private static final Logger logger = LoggerFactory.getLogger(UpdateBookDetails.class);
 
     @Autowired
     private BookRepository bookRepository;

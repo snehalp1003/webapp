@@ -6,6 +6,8 @@ package com.csye6225.cloudwebapp.api.rest.cart;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,8 @@ import io.swagger.annotations.ApiResponses;
 @RestController
 @RequestMapping("/v1/viewCartDetails/bookBoughtBy/{bookBoughtBy}")
 public class ViewCartDetails {
+    
+    private static final Logger logger = LoggerFactory.getLogger(ViewCartDetails.class);
 
     @Autowired
     private BookRepository bookRepository;
