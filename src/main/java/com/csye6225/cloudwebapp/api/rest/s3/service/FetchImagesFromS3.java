@@ -14,8 +14,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +25,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import com.csye6225.cloudwebapp.JPAConfig;
 import com.csye6225.cloudwebapp.api.model.Image;
 import com.csye6225.cloudwebapp.datasource.repository.ImageRepository;
 
@@ -56,11 +49,11 @@ public class FetchImagesFromS3 {
     @Autowired
     private ImageRepository imageRepository;
     
-//    @Autowired
-//    private AmazonS3 amazonS3;
-    private AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
-            .withCredentials(new InstanceProfileCredentialsProvider(true))
-            .build();
+    @Autowired
+    private AmazonS3 amazonS3;
+//    private AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
+//            .withCredentials(new InstanceProfileCredentialsProvider(true))
+//            .build();
     
     @Value("${BUCKET_NAME}")
     private String bucketName;

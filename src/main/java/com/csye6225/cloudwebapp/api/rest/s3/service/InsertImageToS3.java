@@ -8,8 +8,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.csye6225.cloudwebapp.JPAConfig;
 import com.csye6225.cloudwebapp.api.model.Image;
 import com.csye6225.cloudwebapp.datasource.repository.ImageRepository;
 
@@ -54,11 +46,11 @@ public class InsertImageToS3 {
     @Autowired
     private ImageRepository imageRepository;
     
-//    @Autowired
-//    private AmazonS3 amazonS3;
-    private AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
-            .withCredentials(new InstanceProfileCredentialsProvider(true))
-            .build();
+    @Autowired
+    private AmazonS3 amazonS3;
+//    private AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
+//            .withCredentials(new InstanceProfileCredentialsProvider(true))
+//            .build();
     
     @Value("${BUCKET_NAME}")
     private String bucketName;
