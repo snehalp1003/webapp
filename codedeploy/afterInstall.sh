@@ -4,7 +4,7 @@ sudo chown -R ubuntu:ubuntu /home/ubuntu/*
 sudo chmod +x cloudwebapp-0.0.1-SNAPSHOT.jar
 
 #Kill application if already running
-kill -9 $(ps -ef|grep demo-0.0.1 | grep -v grep | awk '{print $2}')
+kill -9 $(ps -ef|grep cloudwebapp-0.0.1 | grep -v grep | awk '{print $2}')
 
 source /etc/environment
 #Running application and appending logs
