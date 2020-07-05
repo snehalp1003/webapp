@@ -6,13 +6,14 @@ package com.csye6225.cloudwebapp.api.rest.book;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,6 +37,8 @@ import io.swagger.annotations.ApiResponses;
 @RestController
 @RequestMapping("/v1/deleteBook/bookISBN/{bookISBN}/bookSoldBy/{bookSoldBy}/userLoggedIn/{userLoggedIn}")
 public class DeleteBook {
+    
+    private static final Logger logger = LoggerFactory.getLogger(DeleteBook.class);
 
     @Autowired
     private BookRepository bookRepository;
