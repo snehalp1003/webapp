@@ -4,8 +4,6 @@ import static springfox.documentation.builders.PathSelectors.regex;
 
 import java.util.Arrays;
 
-import javax.servlet.MultipartConfigElement;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
