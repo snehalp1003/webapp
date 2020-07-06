@@ -18,8 +18,7 @@ import com.timgroup.statsd.StatsDClient;
 @Configuration
 public class StatsDConfig {
 
-    @Value("true")
-    private boolean publishMessage;
+    private boolean publishMessage = true;
 
     @Value("localhost")
     private String metricHost;

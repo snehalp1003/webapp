@@ -48,7 +48,7 @@ public class CreateNewUser {
             @PathVariable(value = "userFirstName") String userFirstName,
             @PathVariable(value = "userLastName") String userLastName) throws IOException {
         logger.info("Creating New User");
-        statsd.incrementCounter("createNewUser");
+        statsd.increment("createNewUserApi");
         long start = System.currentTimeMillis();
 
         if (userRepository.findByUserEmailAddress(userEmailAddress) != null) {
