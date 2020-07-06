@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
@@ -49,6 +50,13 @@ public class AWSConfig {
         amazonS3Client.setRegion(Region.getRegion(Regions.fromName(region)));
         return amazonS3Client;
     }
+    
+//    @Bean
+//    public static AmazonS3Client amazonS3Client() {
+//        return (AmazonS3Client) AmazonS3ClientBuilder.standard()
+//                .withCredentials(new DefaultAWSCredentialsProviderChain())
+//                .build();
+//    }
     
 
 //    @Bean
