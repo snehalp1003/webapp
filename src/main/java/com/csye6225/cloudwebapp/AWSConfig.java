@@ -24,18 +24,18 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 @Configuration
 public class AWSConfig {
 
-    @Value("${AWS_ACCESS_KEY_ID}")
-    private String accessKeyId;
+//    @Value("${AWS_ACCESS_KEY_ID}")
+//    private String accessKeyId;
     
 //    private String accessKeyId = "AKIAIGJDIIDOLZX56DJQ";
     
-    @Value("${AWS_SECRET_ACCESS_KEY}")
-    private String secretKey;
+//    @Value("${AWS_SECRET_ACCESS_KEY}")
+//    private String secretKey;
     
 //    private String secretKey = "lxXw3FGZBLHrUw5o/hbED0jixnBYDdE+wx1gyjWM";
 
-    @Value("${AWS_REGION}")
-    private String region;
+//    @Value("${AWS_REGION}")
+//    private String region;
     
 //    private String region = "us-east-1";
 
