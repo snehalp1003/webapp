@@ -39,24 +39,24 @@ public class AWSConfig {
     
 //    private String region = "us-east-1";
 
-    @Bean
-    public BasicAWSCredentials basicAWSCredentials() {
-        return new BasicAWSCredentials(accessKeyId, secretKey);
-    }
-    
-    @Bean
-    public AmazonS3Client amazonS3Client(AWSCredentials awsCredentials) {
-        AmazonS3Client amazonS3Client = new AmazonS3Client(awsCredentials);
-        amazonS3Client.setRegion(Region.getRegion(Regions.fromName(region)));
-        return amazonS3Client;
-    }
-    
 //    @Bean
-//    public static AmazonS3Client amazonS3Client() {
-//        return (AmazonS3Client) AmazonS3ClientBuilder.standard()
-//                .withCredentials(new DefaultAWSCredentialsProviderChain())
-//                .build();
+//    public BasicAWSCredentials basicAWSCredentials() {
+//        return new BasicAWSCredentials(accessKeyId, secretKey);
 //    }
+//    
+//    @Bean
+//    public AmazonS3Client amazonS3Client(AWSCredentials awsCredentials) {
+//        AmazonS3Client amazonS3Client = new AmazonS3Client(awsCredentials);
+//        amazonS3Client.setRegion(Region.getRegion(Regions.fromName(region)));
+//        return amazonS3Client;
+//    }
+    
+    @Bean
+    public static AmazonS3Client amazonS3Client() {
+        return (AmazonS3Client) AmazonS3ClientBuilder.standard()
+                .withCredentials(new DefaultAWSCredentialsProviderChain())
+                .build();
+    }
     
 
 //    @Bean
