@@ -20,6 +20,7 @@ import com.csye6225.cloudwebapp.api.model.Book;
 import com.csye6225.cloudwebapp.api.model.Cart;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
 import com.csye6225.cloudwebapp.datasource.repository.CartRepository;
+import com.timgroup.statsd.StatsDClient;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -40,6 +41,9 @@ public class ViewCartDetails {
 
     @Autowired
     private CartRepository cartRepository;
+    
+    @Autowired
+    private StatsDClient statsd;
 
     @GetMapping
     @ApiOperation(value = "Returns updated cart for a user", notes = "Returns updated cart for a user")
@@ -52,8 +56,15 @@ public class ViewCartDetails {
     // Specific method to return updated cart
     public ResponseEntity viewCartDetails(@PathVariable(value = "bookBoughtBy") String bookBoughtBy)
             throws IOException {
+        
+        statsd.incrementCounter("viewCartDetailsApi");
+        long start = System.currentTimeMillis();
 
         ArrayList<Cart> availableCartItems = cartRepository.findAll();
+        
+        long dbEnd = System.currentTimeMillis();
+        long dbTimeElapsed = dbEnd - start;
+        statsd.recordExecutionTime("viewCartDetailsDBTime", dbTimeElapsed);
 
         ArrayList<Book> returnUpdatedCartItems = new ArrayList<Book>();
         if (availableCartItems != null && availableCartItems.size() > 0) {
@@ -66,8 +77,16 @@ public class ViewCartDetails {
         }
 
         if (returnUpdatedCartItems != null && returnUpdatedCartItems.size() > 0) {
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("viewCartDetailsApiTime", timeElapsed);
+            logger.info("**********Fetched cart details**********");
             return new ResponseEntity(returnUpdatedCartItems, HttpStatus.OK);
         } else {
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("viewCartDetailsApiTime", timeElapsed);
+            logger.info("**********Cart is empty**********");
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
     }

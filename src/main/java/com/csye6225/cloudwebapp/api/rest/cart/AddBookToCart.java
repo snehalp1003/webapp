@@ -22,6 +22,7 @@ import com.csye6225.cloudwebapp.api.model.Cart;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
 import com.csye6225.cloudwebapp.datasource.repository.CartRepository;
 import com.csye6225.cloudwebapp.utility.UtilityService;
+import com.timgroup.statsd.StatsDClient;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -43,6 +44,9 @@ public class AddBookToCart {
     @Autowired
     private CartRepository cartRepository;
     
+    @Autowired
+    private StatsDClient statsd;
+    
     @PostMapping
     @ApiOperation(value = "Adds book to cart", notes = "Adds book to cart")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Book added successfully to cart"),
@@ -56,6 +60,9 @@ public class AddBookToCart {
     public ResponseEntity addBookToCart(@PathVariable(value = "bookBoughtBy") String bookBoughtBy,
             @PathVariable(value = "bookISBN") String bookISBN,
             @RequestBody Cart cartItem) throws IOException {
+        
+        statsd.incrementCounter("addBookToCartApi");
+        long start = System.currentTimeMillis();
 
         if (cartRepository.findByBookBoughtByAndBookISBN(bookBoughtBy, bookISBN) != null) {
             
@@ -68,13 +75,25 @@ public class AddBookToCart {
             if(book.getBookQuantity() < 1) {
                 return new ResponseEntity("Requested quantity not available", HttpStatus.NOT_ACCEPTABLE);
             } else {
+                long dbStart = System.currentTimeMillis();
                 cartRepository.save(cartItem);
+                long dbEnd = System.currentTimeMillis();
+                long dbTimeElapsed = dbEnd - dbStart;
+                statsd.recordExecutionTime("addBookToCartDBTime", dbTimeElapsed);
                 book.setBookQuantity(book.getBookQuantity() - 1);
                 book.setBookLastModified(new Date());
                 bookRepository.save(book);
+                long end = System.currentTimeMillis();
+                long timeElapsed = end - start;
+                statsd.recordExecutionTime("addBookToCartApiTime", timeElapsed);
+                logger.info("**********Book added to cart**********");
                 return new ResponseEntity(cartItem, HttpStatus.OK);
             }
         } else {
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("addBookToCartApiTime", timeElapsed);
+            logger.info("**********Book not found**********");
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
 

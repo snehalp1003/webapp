@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.csye6225.cloudwebapp.api.model.Book;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
 import com.csye6225.cloudwebapp.utility.UtilityService;
+import com.timgroup.statsd.StatsDClient;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -37,6 +38,9 @@ public class CreateBookDetails {
 
     @Autowired
     private BookRepository bookRepository;
+    
+    @Autowired
+    private StatsDClient statsd;
 
     @PostMapping
     @ApiOperation(value = "Creates new book details", notes = "Creates new book details")
@@ -50,8 +54,15 @@ public class CreateBookDetails {
     // Specific method to insert book details
     public ResponseEntity createBookDetails(@PathVariable(value = "bookISBN") String bookISBN,
             @PathVariable(value = "bookSoldBy") String bookSoldBy, @RequestBody Book bookDetails) throws IOException {
+        
+        statsd.incrementCounter("createBookDetailsApi");
+        long start = System.currentTimeMillis();
 
         if (bookRepository.findByBookISBNAndBookSoldBy(bookISBN, bookSoldBy) != null) {
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("createBookDetailsApiTime", timeElapsed);
+            logger.info("**********Book already exists in database !**********");
 
             return new ResponseEntity("Duplicate entry !", HttpStatus.CONFLICT);
         } else if (UtilityService.checkStringNotNull(bookISBN) && UtilityService.checkStringNotNull(bookSoldBy)) {
@@ -59,14 +70,30 @@ public class CreateBookDetails {
                     && UtilityService.checkIfValidBookQuantity(bookDetails.getBookQuantity())) {
                 bookDetails.setBookAdded(new Date());
                 bookDetails.setBookLastModified(new Date());
+                long dbStart = System.currentTimeMillis();
                 bookRepository.save(bookDetails);
+                
+                long end = System.currentTimeMillis();
+                long dbTimeElapsed = end - dbStart;
+                long timeElapsed = end - start;
+                statsd.recordExecutionTime("saveBookToDBTime", dbTimeElapsed);
+                statsd.recordExecutionTime("createBookDetailsApiTime", timeElapsed);
+                logger.info("**********Inserting New Book**********");
 
                 return new ResponseEntity(bookDetails, HttpStatus.OK);
             } else {
+                long end = System.currentTimeMillis();
+                long timeElapsed = end - start;
+                statsd.recordExecutionTime("createBookDetailsApiTime", timeElapsed);
+                logger.info("**********Invalid book quantity or book price**********");
                 return new ResponseEntity("Invalid book quantity or book price",HttpStatus.NOT_ACCEPTABLE);
             }
             
         } else {
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("createBookDetailsApiTime", timeElapsed);
+            logger.info("**********Other Error**********");
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
 

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.csye6225.cloudwebapp.api.model.Book;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
 import com.csye6225.cloudwebapp.utility.UtilityService;
+import com.timgroup.statsd.StatsDClient;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -37,6 +38,9 @@ public class UpdateBookDetails {
 
     @Autowired
     private BookRepository bookRepository;
+    
+    @Autowired
+    private StatsDClient statsd;
     
     @PutMapping
     @ApiOperation(value = "Updates book details", notes = "Updates new book details")

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.csye6225.cloudwebapp.api.model.Book;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
+import com.timgroup.statsd.StatsDClient;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -36,6 +37,9 @@ public class ViewBooksForSelling {
     
     @Autowired
     private BookRepository bookRepository;
+    
+    @Autowired
+    private StatsDClient statsd;
 
     @GetMapping
     @ApiOperation(value = "Returns list of available books", notes = "Returns list of available books")
@@ -49,8 +53,14 @@ public class ViewBooksForSelling {
     // Specific method to return available books
     public ResponseEntity viewBooksForSelling(@PathVariable(value = "userLoggedIn") String userLoggedIn)
             throws IOException {
+        
+        statsd.incrementCounter("viewBooksForSellingApi");
+        long start = System.currentTimeMillis();
 
         ArrayList<Book> availableBooks = bookRepository.findAll();
+        long dbEnd = System.currentTimeMillis();
+        long dbTimeElapsed = dbEnd - start;
+        statsd.recordExecutionTime("viewBooksForSellingDBTime", dbTimeElapsed);
 
         ArrayList<Book> returnAvailableBooks = new ArrayList<Book>();
         if (availableBooks != null && availableBooks.size() > 0) {
@@ -62,8 +72,16 @@ public class ViewBooksForSelling {
         }
         
         if (returnAvailableBooks != null && returnAvailableBooks.size() > 0) {
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("viewBooksForSellingApiTime", timeElapsed);
+            logger.info("**********Returned list of books put up for selling!**********");
             return new ResponseEntity(returnAvailableBooks, HttpStatus.OK);
         } else {
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("viewBooksForSellingApiTime", timeElapsed);
+            logger.info("**********No books put up for selling !**********");
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
     }

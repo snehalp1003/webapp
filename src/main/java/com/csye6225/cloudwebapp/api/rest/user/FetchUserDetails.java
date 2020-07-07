@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.csye6225.cloudwebapp.api.model.User;
 import com.csye6225.cloudwebapp.datasource.repository.UserRepository;
 import com.csye6225.cloudwebapp.utility.UtilityService;
+import com.timgroup.statsd.StatsDClient;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -33,6 +34,9 @@ public class FetchUserDetails {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private StatsDClient statsd;
 
     @GetMapping
     @ApiOperation(value = "Fetches user details", notes = "Fetches user details")
@@ -46,11 +50,27 @@ public class FetchUserDetails {
     public ResponseEntity fetchUserDetails(
             @PathVariable(value = "userEmailAddress") String userEmailAddress,
             @PathVariable(value = "userPassword") String userPassword) throws IOException {
+        
+        statsd.incrementCounter("fetchUserDetailsApi");
+        long start = System.currentTimeMillis();
 
         User user = userRepository.findByUserEmailAddress(userEmailAddress);
+        long dbEnd = System.currentTimeMillis();
         if (user != null && UtilityService.checkPassword(userPassword, user.getUserPassword())) {
+            long end = System.currentTimeMillis();
+            long dbTimeElapsed = dbEnd - start;
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("fetchUserFromDBTime", dbTimeElapsed);
+            statsd.recordExecutionTime("fetchUserDetailsApiTime", timeElapsed);
+            logger.info("**********User details fetched successfully !**********");
             return new ResponseEntity(user, HttpStatus.OK);
         } else {
+            long end = System.currentTimeMillis();
+            long dbTimeElapsed = dbEnd - start;
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("fetchUserFromDBTime", dbTimeElapsed);
+            statsd.recordExecutionTime("fetchUserDetailsApiTime", timeElapsed);
+            logger.info("**********User not found !**********");
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
 

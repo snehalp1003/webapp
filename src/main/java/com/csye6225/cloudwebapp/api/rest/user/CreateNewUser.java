@@ -47,15 +47,14 @@ public class CreateNewUser {
             @PathVariable(value = "userPassword") String userPassword,
             @PathVariable(value = "userFirstName") String userFirstName,
             @PathVariable(value = "userLastName") String userLastName) throws IOException {
-        logger.info("Creating New User");
-        statsd.increment("createNewUserApi");
+        
+        statsd.incrementCounter("createNewUserApi");
         long start = System.currentTimeMillis();
 
         if (userRepository.findByUserEmailAddress(userEmailAddress) != null) {
-            logger.info("User account already exists with this email !");
+            logger.info("**********User account already exists with this email ! **********");
             long end = System.currentTimeMillis();
             long timeElapsed = end - start;
-            logger.info("Time taken by createNewUser API is " + timeElapsed + "ms");
             statsd.recordExecutionTime("createNewUserApiTime", timeElapsed);
             return new ResponseEntity("User account already exists with this email !",HttpStatus.CONFLICT);
         } else if (UtilityService.checkStringNotNull(userEmailAddress)
@@ -67,23 +66,25 @@ public class CreateNewUser {
                 user.setUserPassword(UtilityService.hashPassword(userPassword));
                 user.setUserFirstName(userFirstName);
                 user.setUserLastName(userLastName);
+                long dbStart = System.currentTimeMillis();
                 userRepository.save(user);
                 long end = System.currentTimeMillis();
+                long dbTimeElapsed = end - dbStart;
                 long timeElapsed = end - start;
-                logger.info("Time taken by createNewUser API is " + timeElapsed + "ms");
+                statsd.recordExecutionTime("saveUserToDBTime", dbTimeElapsed);
                 statsd.recordExecutionTime("createNewUserApiTime", timeElapsed);
+                logger.info("**********Creating New User**********");
                 return new ResponseEntity(user, HttpStatus.OK);
             } else {
                 long end = System.currentTimeMillis();
                 long timeElapsed = end - start;
-                logger.info("Time taken by createNewUser API is " + timeElapsed + "ms");
                 statsd.recordExecutionTime("createNewUserApiTime", timeElapsed);
+                logger.info("**********Email Address or password in incorrect format !**********");
                 return new ResponseEntity("Email Address or password in incorrect format !", HttpStatus.BAD_REQUEST);
             }
         } else {
             long end = System.currentTimeMillis();
             long timeElapsed = end - start;
-            logger.info("Time taken by createNewUser API is " + timeElapsed + "ms");
             statsd.recordExecutionTime("createNewUserApiTime", timeElapsed);
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }

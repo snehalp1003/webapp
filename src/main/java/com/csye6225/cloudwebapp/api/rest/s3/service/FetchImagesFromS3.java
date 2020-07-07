@@ -30,6 +30,7 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.csye6225.cloudwebapp.api.model.Image;
 import com.csye6225.cloudwebapp.datasource.repository.ImageRepository;
+import com.timgroup.statsd.StatsDClient;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -48,6 +49,9 @@ public class FetchImagesFromS3 {
 
     @Autowired
     private ImageRepository imageRepository;
+    
+    @Autowired
+    private StatsDClient statsd;
     
     @Autowired
     private AmazonS3 amazonS3;
@@ -70,6 +74,9 @@ public class FetchImagesFromS3 {
             @ApiResponse(code = 500, message = "Internal error, not able to perform the operation.") })
     public ResponseEntity fetchImagesFromS3(@PathVariable(value = "bookISBN") String bookISBN,
             @PathVariable(value = "userLoggedIn") String userLoggedIn) throws IOException {
+        
+        statsd.incrementCounter("fetchImagesFromS3Api");
+        long start = System.currentTimeMillis();
 
         ArrayList<Image> availableImages = imageRepository.findAll();
         ArrayList<Image> validAvailableImages = new ArrayList<Image>();
@@ -86,7 +93,11 @@ public class FetchImagesFromS3 {
         
         if(validAvailableImages != null && validAvailableImages.size() > 0) {
             for (Image fetchImg : validAvailableImages) {
+              long dbFetchImageFromS3Start = System.currentTimeMillis();
               S3Object s3Object = this.amazonS3.getObject(new GetObjectRequest(bucketName, fetchImg.getImageName()));
+              long dbFetchImageFromS3End = System.currentTimeMillis();
+              long dbFetchImageFromS3TimeElapsed = dbFetchImageFromS3End - dbFetchImageFromS3Start;
+              statsd.recordExecutionTime("fetchImageFromS3Time", dbFetchImageFromS3TimeElapsed);
               String extension = s3Object.getObjectMetadata().getContentType();
               InputStream is = s3Object.getObjectContent();
               File f = new File((new Date()).toString() + s3Object.getKey());
@@ -101,8 +112,16 @@ public class FetchImagesFromS3 {
         }
         
         if(returnAvailableImages != null && returnAvailableImages.size() > 0) {
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("fetchImagesFromS3ApiTime", timeElapsed);
+            logger.info("**********Image fetched from S3 bucket successfully**********");
             return new ResponseEntity(returnAvailableImages, HttpStatus.OK);
         } else {
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("fetchImagesFromS3ApiTime", timeElapsed);
+            logger.info("**********No images present in S3 bucket**********");
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
     }

@@ -21,6 +21,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.csye6225.cloudwebapp.api.model.Image;
 import com.csye6225.cloudwebapp.datasource.repository.ImageRepository;
+import com.timgroup.statsd.StatsDClient;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -40,6 +41,9 @@ public class DeleteImageFromS3 {
     private ImageRepository imageRepository;
     
     @Autowired
+    private StatsDClient statsd;
+    
+    @Autowired
     private AmazonS3 amazonS3;
 //    private AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
 //            .withCredentials(new InstanceProfileCredentialsProvider(true))
@@ -57,23 +61,51 @@ public class DeleteImageFromS3 {
             @ApiResponse(code = 403, message = "Forbidden to access this method."),
             @ApiResponse(code = 404, message = "Requested details not found."),
             @ApiResponse(code = 500, message = "Internal error, not able to perform the operation.") })
-    public ResponseEntity deleteBook(@PathVariable(value = "userLoggedIn") String userLoggedIn,
+    public ResponseEntity deleteImageFromS3(@PathVariable(value = "userLoggedIn") String userLoggedIn,
             @PathVariable(value = "fileName") String fileName) throws IOException {
+        
+        statsd.incrementCounter("deleteImageFromS3Api");
+        long start = System.currentTimeMillis();
 
         try {
             if (imageRepository.findByImageName(fileName) != null) {
                 Image image = imageRepository.findByImageName(fileName);
                 if (image.getBookSoldBy().equals(userLoggedIn)) {
+                    long dbBookImageDeleteFromS3Start = System.currentTimeMillis();
                     amazonS3.deleteObject(new DeleteObjectRequest(bucketName, fileName));
+                    long dbBookImageDeleteFromS3End = System.currentTimeMillis();
+                    long dbBookImageDeleteFromS3TimeElapsed = dbBookImageDeleteFromS3End - dbBookImageDeleteFromS3Start;
+                    statsd.recordExecutionTime("deleteBookImageFromS3Time", dbBookImageDeleteFromS3TimeElapsed);
 
                     imageRepository.delete(image);
+                    
+                    long end = System.currentTimeMillis();
+                    long timeElapsed = end - start;
+                    statsd.recordExecutionTime("deleteImageFromS3ApiTime", timeElapsed);
+                    logger.info("**********Deleted image from S3 bucket successfully**********");
                     return new ResponseEntity(HttpStatus.OK);
+                } else {
+                    long end = System.currentTimeMillis();
+                    long timeElapsed = end - start;
+                    statsd.recordExecutionTime("deleteImageFromS3ApiTime", timeElapsed);
+                    logger.info("**********User does not have permission to delete image !**********");
+                    return new ResponseEntity(HttpStatus.FORBIDDEN);
                 }
+            } else {
+                long end = System.currentTimeMillis();
+                long timeElapsed = end - start;
+                statsd.recordExecutionTime("deleteImageFromS3ApiTime", timeElapsed);
+                logger.info("**********Image not found**********");
+                return new ResponseEntity(HttpStatus.NOT_FOUND);
             }
         } catch (AmazonServiceException ex) {
             logger.error("error [" + ex.getMessage() + "] occurred while removing [" + fileName + "] ");
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("deleteImageFromS3ApiTime", timeElapsed);
+            logger.info("**********Error deleting image from S3 bucket**********");
+            return new ResponseEntity("Error inserting image to S3", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
 
 }
