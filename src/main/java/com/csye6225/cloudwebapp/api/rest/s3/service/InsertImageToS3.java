@@ -27,6 +27,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.csye6225.cloudwebapp.api.model.Image;
 import com.csye6225.cloudwebapp.datasource.repository.ImageRepository;
+import com.timgroup.statsd.StatsDClient;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -45,6 +46,9 @@ public class InsertImageToS3 {
 
     @Autowired
     private ImageRepository imageRepository;
+    
+    @Autowired
+    private StatsDClient statsd;
     
     @Autowired
     private AmazonS3 amazonS3;
@@ -75,6 +79,9 @@ public class InsertImageToS3 {
             @PathVariable(value = "bookISBN") String bookISBN,
             @PathVariable(value = "bookSoldBy") String bookSoldBy) throws IOException {
         
+        statsd.incrementCounter("insertImageToS3Api");
+        long start = System.currentTimeMillis();
+        
         String fileUrl = "";
         Image img = new Image();
         String fileName = multipartFile.getOriginalFilename();
@@ -87,7 +94,11 @@ public class InsertImageToS3 {
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, fileNameWithDate, file);
             putObjectRequest.withCannedAcl(CannedAccessControlList.PublicRead);
 
+            long dbBookImageUploadToS3Start = System.currentTimeMillis();
             this.amazonS3.putObject(putObjectRequest);
+            long dbBookImageUploadToS3End = System.currentTimeMillis();
+            long dbBookImageUploadToS3TimeElapsed = dbBookImageUploadToS3End - dbBookImageUploadToS3Start;
+            statsd.recordExecutionTime("uploadImageToS3Time", dbBookImageUploadToS3TimeElapsed);
             
             img.setBookISBN(bookISBN);
             img.setBookSoldBy(bookSoldBy);
@@ -96,10 +107,18 @@ public class InsertImageToS3 {
             img.setBookAdded(new Date());
             
             imageRepository.save(img);
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("insertImageToS3ApiTime", timeElapsed);
+            logger.info("**********Image uploaded to S3 bucket successfully**********");
             return new ResponseEntity("Image inserted to S3 bucket successfully", HttpStatus.OK);
             
         } catch (IOException | AmazonServiceException ex) {
             logger.error("error [" + ex.getMessage() + "] occurred while uploading [" + fileName + "] ");
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("insertImageToS3ApiTime", timeElapsed);
+            logger.info("**********Error uploading image to S3**********");
             return new ResponseEntity("Error inserting image to S3", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

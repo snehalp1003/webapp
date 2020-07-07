@@ -25,6 +25,7 @@ import com.csye6225.cloudwebapp.api.model.Image;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
 import com.csye6225.cloudwebapp.datasource.repository.CartRepository;
 import com.csye6225.cloudwebapp.datasource.repository.ImageRepository;
+import com.timgroup.statsd.StatsDClient;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -50,6 +51,9 @@ public class DeleteBook {
     private ImageRepository imageRepository;
     
     @Autowired
+    private StatsDClient statsd;
+    
+    @Autowired
     private AmazonS3 amazonS3;
     
     @Value("${BUCKET_NAME}")
@@ -68,18 +72,33 @@ public class DeleteBook {
     public ResponseEntity deleteBook(@PathVariable(value = "bookISBN") String bookISBN,
             @PathVariable(value = "bookSoldBy") String bookSoldBy,
             @PathVariable(value = "userLoggedIn") String userLoggedIn) throws IOException {
+        
+        statsd.incrementCounter("deleteBookApi");
+        long start = System.currentTimeMillis();
 
         if(!bookSoldBy.equals(userLoggedIn)) {
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("deleteBookApiTime", timeElapsed);
+            logger.info("**********User does not have permission to delete book !**********");
             return new ResponseEntity(HttpStatus.FORBIDDEN);
         } else if (bookRepository.findByBookISBNAndBookSoldBy(bookISBN, bookSoldBy) != null) {
+            long dbBookDeleteStart = System.currentTimeMillis();
             Book book = bookRepository.findByBookISBNAndBookSoldBy(bookISBN, bookSoldBy);
             bookRepository.delete(book);
+            long dbBookDeleteEnd = System.currentTimeMillis();
+            long dbBookDeleteTimeElapsed = dbBookDeleteEnd - dbBookDeleteStart;
+            statsd.recordExecutionTime("deleteBookFromDBTime", dbBookDeleteTimeElapsed);
             
             if (cartRepository.findByBookSoldByAndBookISBN(bookSoldBy, bookISBN) != null) {
                 ArrayList<Cart> bookToDeleteInCart = cartRepository.findByBookSoldByAndBookISBN(bookSoldBy, bookISBN);
                 
                 for (Cart bookInCart : bookToDeleteInCart) {
+                    long dbBookDeleteFromCartStart = System.currentTimeMillis();
                     cartRepository.delete(bookInCart);
+                    long dbBookDeleteFromCartEnd = System.currentTimeMillis();
+                    long dbBookDeleteFromCartTimeElapsed = dbBookDeleteFromCartEnd - dbBookDeleteFromCartStart;
+                    statsd.recordExecutionTime("deleteBookFromCartDBTime", dbBookDeleteFromCartTimeElapsed);
                 }
             }
             
@@ -88,16 +107,26 @@ public class DeleteBook {
             if(imagesInRepository != null && imagesInRepository.size() > 0) {
                 for (Image image : imagesInRepository) {
                     if(image.getBookISBN().equals(bookISBN) && image.getBookSoldBy().equals(bookSoldBy)) {
+                        long dbBookImageDeleteFromS3Start = System.currentTimeMillis();
                         amazonS3.deleteObject(new DeleteObjectRequest(bucketName, image.getImageName()));
-
+                        long dbBookImageDeleteFromS3End = System.currentTimeMillis();
+                        long dbBookImageDeleteFromS3TimeElapsed = dbBookImageDeleteFromS3End - dbBookImageDeleteFromS3Start;
+                        statsd.recordExecutionTime("deleteBookImageFromS3Time", dbBookImageDeleteFromS3TimeElapsed);
                         imageRepository.delete(image);
                     }
                 }
             }
             
-
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("deleteBookApiTime", timeElapsed);
+            logger.info("**********Book deleted from database !**********");
             return new ResponseEntity(HttpStatus.OK);
         } else {
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("deleteBookApiTime", timeElapsed);
+            logger.info("**********Book not found !**********");
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
 
