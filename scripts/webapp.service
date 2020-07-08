@@ -8,8 +8,8 @@ ExecStart=/usr/bin/java -jar /home/ubuntu/webapp/cloudwebapp-0.0.1-SNAPSHOT.jar
 SuccessExitStatus=143
 Restart=always
 RestartSec=5
-StandardOutput=file:/home/ubuntu/webapplog.txt
-StandardError=append:/home/ubuntu/webapplog.txt
+StandardOutput=file:/home/ubuntu/webapplog.log
+StandardError=append:/home/ubuntu/webapplog2.log
 
 [Install]
 WantedBy=multi-user.target
