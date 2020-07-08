@@ -1,0 +1,13 @@
+[Unit]
+Description=Webapp
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/webapp
+ExecStart=java -jar cloudwebapp-0.0.1-SNAPSHOT.jar > /home/ubuntu/webapplog.txt 2> /home/ubuntu/webapplog.txt < /home/ubuntu/webapplog.txt &
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
