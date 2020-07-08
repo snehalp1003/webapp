@@ -1,8 +1,8 @@
 #!/bin/bash
 echo "Running after install script"
-cp /home/ubuntu/webapp/webapp.service /etc/systemd/system/
 cd /home/ubuntu/webapp
 sudo chown -R ubuntu:ubuntu /home/ubuntu/*
+cp /home/ubuntu/webapp/webapp.service /etc/systemd/system/
 sudo chmod +x cloudwebapp-0.0.1-SNAPSHOT.jar
 
 #Kill application if already running
