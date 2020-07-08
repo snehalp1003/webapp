@@ -9,7 +9,6 @@ SuccessExitStatus=143
 Restart=always
 RestartSec=5
 StandardOutput=file:/home/ubuntu/webapplog.log
-StandardError=append:/home/ubuntu/webapplog2.log
 
 [Install]
 WantedBy=multi-user.target
