@@ -4,7 +4,7 @@ Description=webapp
 [Service]
 EnvironmentFile=/etc/environment
 User=ubuntu
-ExecStart=/usr/bin/java -jar /home/ubuntu/webapp/cloudwebapp-0.0.1-SNAPSHOT.jar >> /home/ubuntu/webapp.log 2 >> /home/ubuntu/webapp.log
+ExecStart=/usr/bin/java -jar /home/ubuntu/webapp/cloudwebapp-0.0.1-SNAPSHOT.jar
 SuccessExitStatus=143
 Restart=always
 RestartSec=10
