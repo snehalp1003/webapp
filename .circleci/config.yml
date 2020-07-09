@@ -56,8 +56,6 @@ jobs:
             cd webapp_artifact
             echo "Copying all .sh files to webapp_artifact"
             cp ../codedeploy/*.sh .
-            echo "Copying scripts to webapp_artifact"
-            cp ../scripts/*.service .
             echo "Copying all .yml files to webapp_artifact"
             cp ../*.yml .
             echo "Copying cloudwatch-agent json file to the artifact directory"
@@ -71,7 +69,7 @@ jobs:
             echo "Zipping all files in the webapp_artifact directory"
             zip -r webapp-${CIRCLE_BUILD_NUM}.zip .
             echo "Removing the files except for the zip file from the directory"
-            rm *.yml *.sh *.jar *.properties *.json *.service
+            rm *.yml *.sh *.jar *.properties *.json
             ls -al
             pwd
             echo "Changing directory to root"
