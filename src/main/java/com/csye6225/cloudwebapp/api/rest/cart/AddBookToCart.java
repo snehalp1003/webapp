@@ -87,6 +87,13 @@ public class AddBookToCart {
             
             String bookSoldBy = cartItem.getBookSoldBy();
             Book book = bookRepository.findByBookISBNAndBookSoldBy(bookISBN, bookSoldBy);
+            if (book == null) {
+                long end = System.currentTimeMillis();
+                long timeElapsed = end - start;
+                statsd.recordExecutionTime("addBookToCartApiTime", timeElapsed);
+                logger.info("**********Book not found**********");
+                return new ResponseEntity(HttpStatus.NO_CONTENT);
+            }
             if(book.getBookQuantity() < 1) {
                 return new ResponseEntity("Requested quantity not available", HttpStatus.NOT_ACCEPTABLE);
             } else {
