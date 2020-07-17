@@ -51,6 +51,10 @@ public class UpdateUserPassword {
             @PathVariable(value = "newPassword") String newPassword) throws IOException {
 
         User user = userRepository.findByUserEmailAddress(userEmailAddress);
+        if (user == null || !UtilityService.checkStringNotNull(user.getUuid())) {
+            logger.info("**********Session expired for user**********");
+            return new ResponseEntity("Session expired for user.", HttpStatus.REQUEST_TIMEOUT);
+        }
         if (user != null) {
             if (UtilityService.checkPassword(oldPassword, user.getUserPassword())) {
                 if (UtilityService.checkIfValidPassword(newPassword)) {

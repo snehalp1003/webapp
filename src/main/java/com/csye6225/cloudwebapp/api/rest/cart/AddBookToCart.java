@@ -9,6 +9,7 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,8 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.csye6225.cloudwebapp.api.model.Book;
 import com.csye6225.cloudwebapp.api.model.Cart;
+import com.csye6225.cloudwebapp.api.model.User;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
 import com.csye6225.cloudwebapp.datasource.repository.CartRepository;
+import com.csye6225.cloudwebapp.datasource.repository.UserRepository;
 import com.csye6225.cloudwebapp.utility.UtilityService;
 import com.timgroup.statsd.StatsDClient;
 
@@ -45,6 +48,9 @@ public class AddBookToCart {
     private CartRepository cartRepository;
     
     @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
     private StatsDClient statsd;
     
     @PostMapping
@@ -63,6 +69,15 @@ public class AddBookToCart {
         
         statsd.incrementCounter("addBookToCartApi");
         long start = System.currentTimeMillis();
+        
+        User user = userRepository.findByUserEmailAddress(bookBoughtBy);
+        if (user == null || !UtilityService.checkStringNotNull(user.getUuid())) {
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("addBookToCartApiTime", timeElapsed);
+            logger.info("**********Session expired for user**********");
+            return new ResponseEntity("Session expired for user.", HttpStatus.REQUEST_TIMEOUT);
+        }
 
         if (cartRepository.findByBookBoughtByAndBookISBN(bookBoughtBy, bookISBN) != null) {
             
@@ -87,7 +102,9 @@ public class AddBookToCart {
                 long timeElapsed = end - start;
                 statsd.recordExecutionTime("addBookToCartApiTime", timeElapsed);
                 logger.info("**********Book added to cart**********");
-                return new ResponseEntity(cartItem, HttpStatus.OK);
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("session-id", user.getUuid());
+                return ResponseEntity.ok().headers(headers).body(cartItem);
             }
         } else {
             long end = System.currentTimeMillis();

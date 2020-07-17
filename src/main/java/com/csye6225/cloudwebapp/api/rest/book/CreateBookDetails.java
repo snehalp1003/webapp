@@ -9,6 +9,7 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.csye6225.cloudwebapp.api.model.Book;
+import com.csye6225.cloudwebapp.api.model.User;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
+import com.csye6225.cloudwebapp.datasource.repository.UserRepository;
 import com.csye6225.cloudwebapp.utility.UtilityService;
 import com.timgroup.statsd.StatsDClient;
 
@@ -40,6 +43,9 @@ public class CreateBookDetails {
     private BookRepository bookRepository;
     
     @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
     private StatsDClient statsd;
 
     @PostMapping
@@ -57,6 +63,14 @@ public class CreateBookDetails {
         
         statsd.incrementCounter("createBookDetailsApi");
         long start = System.currentTimeMillis();
+        User user = userRepository.findByUserEmailAddress(bookSoldBy);
+        if (user == null || !UtilityService.checkStringNotNull(user.getUuid())) {
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("createBookDetailsApiTime", timeElapsed);
+            logger.info("**********Session expired for user**********");
+            return new ResponseEntity("Session expired for user.", HttpStatus.REQUEST_TIMEOUT);
+        }
 
         if (bookRepository.findByBookISBNAndBookSoldBy(bookISBN, bookSoldBy) != null) {
             long end = System.currentTimeMillis();
@@ -79,8 +93,9 @@ public class CreateBookDetails {
                 statsd.recordExecutionTime("saveBookToDBTime", dbTimeElapsed);
                 statsd.recordExecutionTime("createBookDetailsApiTime", timeElapsed);
                 logger.info("**********Inserting New Book**********");
-
-                return new ResponseEntity(bookDetails, HttpStatus.OK);
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("session-id", user.getUuid());
+                return ResponseEntity.ok().headers(headers).body(bookDetails);
             } else {
                 long end = System.currentTimeMillis();
                 long timeElapsed = end - start;

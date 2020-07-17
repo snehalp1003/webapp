@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.csye6225.cloudwebapp.api.model.Book;
+import com.csye6225.cloudwebapp.api.model.User;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
+import com.csye6225.cloudwebapp.datasource.repository.UserRepository;
 import com.timgroup.statsd.StatsDClient;
 
 import io.swagger.annotations.ApiOperation;
@@ -39,6 +42,9 @@ public class ViewBooksForSelling {
     private BookRepository bookRepository;
     
     @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
     private StatsDClient statsd;
 
     @GetMapping
@@ -56,6 +62,8 @@ public class ViewBooksForSelling {
         
         statsd.incrementCounter("viewBooksForSellingApi");
         long start = System.currentTimeMillis();
+        
+        User user = userRepository.findByUserEmailAddress(userLoggedIn);
 
         ArrayList<Book> availableBooks = bookRepository.findAll();
         long dbEnd = System.currentTimeMillis();
@@ -76,7 +84,9 @@ public class ViewBooksForSelling {
             long timeElapsed = end - start;
             statsd.recordExecutionTime("viewBooksForSellingApiTime", timeElapsed);
             logger.info("**********Returned list of books put up for selling!**********");
-            return new ResponseEntity(returnAvailableBooks, HttpStatus.OK);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("session-id", user.getUuid());
+            return ResponseEntity.ok().headers(headers).body(returnAvailableBooks);
         } else {
             long end = System.currentTimeMillis();
             long timeElapsed = end - start;

@@ -31,7 +31,7 @@ public class JPAConfig {
     @Value("${RDS_URL}")
     private String rdsUrl;
     
-//    private String rdsUrl = "csye6225-su2020.cvnoysmwc1he.us-east-1.rds.amazonaws.com";
+//    private String rdsUrl = "csye6225-su2020.cjvbuuknleze.us-east-1.rds.amazonaws.com";
     
     @Value("${DB_USERNAME}")
     private String dbUsername;

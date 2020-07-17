@@ -1,10 +1,12 @@
 package com.csye6225.cloudwebapp.api.rest.user;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,13 +59,21 @@ public class FetchUserDetails {
         User user = userRepository.findByUserEmailAddress(userEmailAddress);
         long dbEnd = System.currentTimeMillis();
         if (user != null && UtilityService.checkPassword(userPassword, user.getUserPassword())) {
+            if(user.getUuid() == null || user.getUuid().isEmpty()) {
+                String generateUUID = UUID.randomUUID().toString(); 
+                user.setUuid(generateUUID);
+                userRepository.save(user);
+            }
+
             long end = System.currentTimeMillis();
             long dbTimeElapsed = dbEnd - start;
             long timeElapsed = end - start;
             statsd.recordExecutionTime("fetchUserFromDBTime", dbTimeElapsed);
             statsd.recordExecutionTime("fetchUserDetailsApiTime", timeElapsed);
             logger.info("**********User details fetched successfully !**********");
-            return new ResponseEntity(user, HttpStatus.OK);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("session-id", user.getUuid());
+            return ResponseEntity.ok().headers(headers).body(user);
         } else {
             long end = System.currentTimeMillis();
             long dbTimeElapsed = dbEnd - start;

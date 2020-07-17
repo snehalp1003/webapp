@@ -16,6 +16,7 @@ public class User {
     private String userPassword;
     private String userFirstName;
     private String userLastName;
+    private String uuid;
     
     /**
      * @param userEmailAddress
@@ -54,6 +55,14 @@ public class User {
 
     public void setUserLastName(String userLastName) {
         this.userLastName = userLastName;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
     
 }
