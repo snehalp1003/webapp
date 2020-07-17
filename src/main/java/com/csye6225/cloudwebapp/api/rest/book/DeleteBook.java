@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,9 +23,12 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.csye6225.cloudwebapp.api.model.Book;
 import com.csye6225.cloudwebapp.api.model.Cart;
 import com.csye6225.cloudwebapp.api.model.Image;
+import com.csye6225.cloudwebapp.api.model.User;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
 import com.csye6225.cloudwebapp.datasource.repository.CartRepository;
 import com.csye6225.cloudwebapp.datasource.repository.ImageRepository;
+import com.csye6225.cloudwebapp.datasource.repository.UserRepository;
+import com.csye6225.cloudwebapp.utility.UtilityService;
 import com.timgroup.statsd.StatsDClient;
 
 import io.swagger.annotations.ApiOperation;
@@ -51,6 +55,9 @@ public class DeleteBook {
     private ImageRepository imageRepository;
     
     @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
     private StatsDClient statsd;
     
     @Autowired
@@ -75,6 +82,15 @@ public class DeleteBook {
         
         statsd.incrementCounter("deleteBookApi");
         long start = System.currentTimeMillis();
+        
+        User user = userRepository.findByUserEmailAddress(userLoggedIn);
+        if (user == null || !UtilityService.checkStringNotNull(user.getUuid())) {
+            long end = System.currentTimeMillis();
+            long timeElapsed = end - start;
+            statsd.recordExecutionTime("deleteBookApiTime", timeElapsed);
+            logger.info("**********Session expired for user**********");
+            return new ResponseEntity("Session expired for user.", HttpStatus.REQUEST_TIMEOUT);
+        }
 
         if(!bookSoldBy.equals(userLoggedIn)) {
             long end = System.currentTimeMillis();
@@ -121,7 +137,9 @@ public class DeleteBook {
             long timeElapsed = end - start;
             statsd.recordExecutionTime("deleteBookApiTime", timeElapsed);
             logger.info("**********Book deleted from database !**********");
-            return new ResponseEntity(HttpStatus.OK);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("session-id", user.getUuid());
+            return ResponseEntity.ok().headers(headers).body(book);
         } else {
             long end = System.currentTimeMillis();
             long timeElapsed = end - start;

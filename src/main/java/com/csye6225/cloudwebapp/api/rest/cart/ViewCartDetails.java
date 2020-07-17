@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,8 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.csye6225.cloudwebapp.api.model.Book;
 import com.csye6225.cloudwebapp.api.model.Cart;
+import com.csye6225.cloudwebapp.api.model.User;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
 import com.csye6225.cloudwebapp.datasource.repository.CartRepository;
+import com.csye6225.cloudwebapp.datasource.repository.UserRepository;
 import com.timgroup.statsd.StatsDClient;
 
 import io.swagger.annotations.ApiOperation;
@@ -43,6 +46,9 @@ public class ViewCartDetails {
     private CartRepository cartRepository;
     
     @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
     private StatsDClient statsd;
 
     @GetMapping
@@ -59,6 +65,8 @@ public class ViewCartDetails {
         
         statsd.incrementCounter("viewCartDetailsApi");
         long start = System.currentTimeMillis();
+        
+        User user = userRepository.findByUserEmailAddress(bookBoughtBy);
 
         ArrayList<Cart> availableCartItems = cartRepository.findAll();
         
@@ -81,7 +89,9 @@ public class ViewCartDetails {
             long timeElapsed = end - start;
             statsd.recordExecutionTime("viewCartDetailsApiTime", timeElapsed);
             logger.info("**********Fetched cart details**********");
-            return new ResponseEntity(returnUpdatedCartItems, HttpStatus.OK);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("session-id", user.getUuid());
+            return ResponseEntity.ok().headers(headers).body(returnUpdatedCartItems);
         } else {
             long end = System.currentTimeMillis();
             long timeElapsed = end - start;

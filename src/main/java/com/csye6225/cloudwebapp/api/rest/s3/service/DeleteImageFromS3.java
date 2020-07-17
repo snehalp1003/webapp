@@ -49,10 +49,10 @@ public class DeleteImageFromS3 {
 //            .withCredentials(new InstanceProfileCredentialsProvider(true))
 //            .build();
     
-    @Value("${BUCKET_NAME}")
-    private String bucketName;
+//    @Value("${BUCKET_NAME}")
+//    private String bucketName;
     
-//    private String bucketName = "webapp.snehal.patel";
+    private String bucketName = "webapp.snehal.patel";
 
     @DeleteMapping
     @ApiOperation(value = "Deletes specified book image", notes = "Deletes specified book image")

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.csye6225.cloudwebapp.api.model.User;
 import com.csye6225.cloudwebapp.datasource.repository.UserRepository;
 import com.csye6225.cloudwebapp.utility.UtilityService;
+import com.timgroup.statsd.StatsDClient;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -27,44 +28,41 @@ import io.swagger.annotations.ApiResponses;
  * @author Snehal Patel
  *
  */
-
 @RestController
-@RequestMapping("/v1/updatePersonalDetails/userEmailAddress/{userEmailAddress}/userFirstName/{userFirstName}/userLastName/{userLastName}")
-public class UpdateUserDetails {
+@RequestMapping("/v1/logoutUser/userEmailAddress/{userEmailAddress}")
+public class LogoutUser {
+
     
-    private static final Logger logger = LoggerFactory.getLogger(UpdateUserDetails.class);
+    private static final Logger logger = LoggerFactory.getLogger(LogoutUser.class);
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private StatsDClient statsd;
 
     @PutMapping
-    @ApiOperation(value = "Updates user details", notes = "Updates user details")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "Updated user details successfully."),
+    @ApiOperation(value = "Logout user", notes = "Logout user")
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Logged user successfully."),
             @ApiResponse(code = 401, message = "User is Unauthorized to access this method."),
             @ApiResponse(code = 403, message = "Forbidden to access this method."),
             @ApiResponse(code = 404, message = "Requested details not found."),
             @ApiResponse(code = 500, message = "Internal error, not able to perform the operation.") })
     // Specific method to update user details
-    public ResponseEntity updateUserDetails(@PathVariable(value = "userEmailAddress") String userEmailAddress,
-            @PathVariable(value = "userFirstName") String userFirstName,
-            @PathVariable(value = "userLastName") String userLastName) throws IOException {
+    public ResponseEntity logoutUser(@PathVariable(value = "userEmailAddress") String userEmailAddress) throws IOException {
 
         User user = userRepository.findByUserEmailAddress(userEmailAddress);
-        if (user == null || !UtilityService.checkStringNotNull(user.getUuid())) {
-            logger.info("**********Session expired for user**********");
-            return new ResponseEntity("Session expired for user.", HttpStatus.REQUEST_TIMEOUT);
-        }
-        
-        if (user != null && UtilityService.checkStringNotNull(userFirstName)
-                && UtilityService.checkStringNotNull(userLastName)) {
-            user.setUserFirstName(userFirstName);
-            user.setUserLastName(userLastName);
+        if (user != null && UtilityService.checkStringNotNull(user.getUuid())) {
+            user.setUuid(null);
             userRepository.save(user);
-            return new ResponseEntity(user, HttpStatus.OK);
+            logger.info("**********User logged out successfully!**********");
+            return new ResponseEntity(HttpStatus.OK);
         } else {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
 
     }
+
+
 
 }

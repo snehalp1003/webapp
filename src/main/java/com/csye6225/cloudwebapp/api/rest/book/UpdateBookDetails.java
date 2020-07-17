@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.csye6225.cloudwebapp.api.model.Book;
+import com.csye6225.cloudwebapp.api.model.User;
 import com.csye6225.cloudwebapp.datasource.repository.BookRepository;
+import com.csye6225.cloudwebapp.datasource.repository.UserRepository;
 import com.csye6225.cloudwebapp.utility.UtilityService;
 import com.timgroup.statsd.StatsDClient;
 
@@ -40,6 +42,9 @@ public class UpdateBookDetails {
     private BookRepository bookRepository;
     
     @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
     private StatsDClient statsd;
     
     @PutMapping
@@ -54,6 +59,12 @@ public class UpdateBookDetails {
     public ResponseEntity updateBookDetails(@PathVariable(value = "bookISBN") String bookISBN,
             @PathVariable(value = "userLoggedIn") String userLoggedIn,
             @RequestBody Book bookDetails) throws IOException {
+        
+        User user = userRepository.findByUserEmailAddress(userLoggedIn);
+        if (user == null || !UtilityService.checkStringNotNull(user.getUuid())) {
+            logger.info("**********Session expired for user**********");
+            return new ResponseEntity("Session expired for user.", HttpStatus.REQUEST_TIMEOUT);
+        }
 
         if(!userLoggedIn.equals(bookDetails.getBookSoldBy())) {
             return new ResponseEntity("Cannot update book belonging to another seller !", HttpStatus.FORBIDDEN);
