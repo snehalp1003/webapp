@@ -55,14 +55,11 @@ public class FetchImagesFromS3 {
     
     @Autowired
     private AmazonS3 amazonS3;
-//    private AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
-//            .withCredentials(new InstanceProfileCredentialsProvider(true))
-//            .build();
     
-//    @Value("${BUCKET_NAME}")
-//    private String bucketName;
+    @Value("${BUCKET_NAME}")
+    private String bucketName;
     
-    private String bucketName = "webapp.snehal.patel";
+//    private String bucketName = "webapp.snehal.patel";
 
     @GetMapping
     @ApiOperation(value = "Returns list of available images", notes = "Returns list of available images")

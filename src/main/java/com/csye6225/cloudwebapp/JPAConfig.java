@@ -28,20 +28,20 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class JPAConfig {
     
-//    @Value("${RDS_URL}")
-//    private String rdsUrl;
+    @Value("${RDS_URL}")
+    private String rdsUrl;
     
-    private String rdsUrl = "csye6225-su2020.cjvbuuknleze.us-east-1.rds.amazonaws.com";
+//    private String rdsUrl = "csye6225-su2020.cjvbuuknleze.us-east-1.rds.amazonaws.com";
     
-//    @Value("${DB_USERNAME}")
-//    private String dbUsername;
+    @Value("${DB_USERNAME}")
+    private String dbUsername;
     
-    private String dbUsername = "csye6225";
+//    private String dbUsername = "csye6225";
     
-//    @Value("${DB_PASSWORD}")
-//    private String dbPassword;
+    @Value("${DB_PASSWORD}")
+    private String dbPassword;
     
-    private String dbPassword = "Password123";
+//    private String dbPassword = "Password123";
 
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {

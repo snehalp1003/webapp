@@ -52,19 +52,16 @@ public class InsertImageToS3 {
     
     @Autowired
     private AmazonS3 amazonS3;
-//    private AmazonS3 amazonS3 = AmazonS3ClientBuilder.standard()
-//            .withCredentials(new InstanceProfileCredentialsProvider(true))
-//            .build();
     
-//    @Value("${BUCKET_NAME}")
-//    private String bucketName;
+    @Value("${BUCKET_NAME}")
+    private String bucketName;
     
-    private String bucketName = "webapp.snehal.patel";
+//    private String bucketName = "webapp.snehal.patel";
     
-//    @Value("${BUCKET_URL}")
-//    private String bucketUrl;
+    @Value("${BUCKET_URL}")
+    private String bucketUrl;
     
-    private String bucketUrl = "https://s3.us-east-1.amazonaws.com";
+//    private String bucketUrl = "https://s3.us-east-1.amazonaws.com";
 
     @PostMapping
     @ApiOperation(value = "Inserts image to S3", notes = "Inserts image to S3")
