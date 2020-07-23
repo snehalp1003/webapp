@@ -22,7 +22,6 @@ import com.amazonaws.services.sqs.model.AmazonSQSException;
 import com.amazonaws.services.sqs.model.CreateQueueResult;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
-import com.csye6225.cloudwebapp.api.model.User;
 
 /**
  * @author Snehal Patel
