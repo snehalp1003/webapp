@@ -40,7 +40,8 @@ public class SNSClient {
 
     public void publish(String message) {
         final PublishRequest publishRequest = new PublishRequest(topicArn, message);
+        logger.info("**********Published Request : " + publishRequest.toString() + " **********");
         final PublishResult publishResponse = snsClient.publish(publishRequest);
-        logger.info("**********Message Published ! Message ID :- " + publishResponse.getMessageId() + " **********");
+        logger.info("**********Message Published ! Message ID : " + publishResponse.getMessageId() + " **********");
     }
 }
