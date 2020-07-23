@@ -54,7 +54,7 @@ public class SQSClient {
     public void sendEmail(String userEmail, String token) {
         try {
             receiveMessageAndDelete();
-//            CreateQueueResult create_result = sqsClient.createQueue(sqsQueue);
+            CreateQueueResult create_result = sqsClient.createQueue(sqsQueue);
             String queueUrl = sqsClient.getQueueUrl(sqsQueue).getQueueUrl();
             StringBuilder messageString = new StringBuilder();
             messageString.append(userEmail + ",");
