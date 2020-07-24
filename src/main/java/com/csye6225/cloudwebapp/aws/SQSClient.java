@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ import com.amazonaws.services.sqs.model.SendMessageRequest;
  */
 
 @Service("amazonSQSService")
+@EnableScheduling
 public class SQSClient {
 
     private static final Logger logger = LoggerFactory.getLogger(SQSClient.class);
@@ -51,10 +53,10 @@ public class SQSClient {
                 .withCredentials(DefaultAWSCredentialsProviderChain.getInstance()).build();
     }
     
-    public void sendEmail(String userEmail, String token) throws InterruptedException {
+    public void sendEmail(String userEmail, String token) {
         try {
             receiveMessageAndDelete();
-            CreateQueueResult create_result = sqsClient.createQueue(sqsQueue);
+//            CreateQueueResult create_result = sqsClient.createQueue(sqsQueue);
             String queueUrl = sqsClient.getQueueUrl(sqsQueue).getQueueUrl();
             StringBuilder messageString = new StringBuilder();
             messageString.append(userEmail + ",");
@@ -65,7 +67,6 @@ public class SQSClient {
                     .withQueueUrl(queueUrl).withMessageBody(messageString.toString());
             sqsClient.sendMessage(messageRequest);
             logger.info("********** Message added in queue **********");
-            Thread.sleep(5000);
             receiveMessageAndDelete();
         } catch (AmazonSQSException exception) {
             if (!exception.getErrorCode().equals("********** The queue already exists **********" )) {
@@ -79,9 +80,9 @@ public class SQSClient {
     public void receiveMessageAndDelete() {
         logger.info("********** Inside receiveMessageAndDelete method **********");
         String queueUrl = sqsClient.getQueueUrl(sqsQueue).getQueueUrl();
-        final ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(queueUrl).withMaxNumberOfMessages(1);
-        logger.info("********** ReceiveMessageRequest: "+ receiveMessageRequest.toString() + "**********");
-        List<Message> receivedMessageList = sqsClient.receiveMessage(receiveMessageRequest).getMessages();
+//        final ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(queueUrl).withMaxNumberOfMessages(1);
+//        logger.info("********** ReceiveMessageRequest: "+ receiveMessageRequest.toString() + "**********");
+        List<Message> receivedMessageList = sqsClient.receiveMessage(queueUrl).getMessages();
         logger.info("********** Message List: "+ receivedMessageList.toString() + "**********");
         for(Message message : receivedMessageList) {
             if (message.getBody()!= null && !message.getBody().isEmpty()) {
