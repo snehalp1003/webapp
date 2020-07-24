@@ -66,10 +66,9 @@ public class SQSClient {
             SendMessageRequest messageRequest = new SendMessageRequest()
                     .withQueueUrl(queueUrl).withMessageBody(messageString.toString());
             sqsClient.sendMessage(messageRequest);
-            logger.info("********** Message added in queue **********");
             receiveMessageAndDelete();
         } catch (AmazonSQSException exception) {
-            if (!exception.getErrorCode().equals("********** The queue already exists **********" )) {
+            if (!exception.getErrorCode().equals("********** Queue already exists **********" )) {
                 logger.error(exception.getMessage());
                 throw exception;
             }
@@ -83,7 +82,6 @@ public class SQSClient {
 //        final ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(queueUrl).withMaxNumberOfMessages(1);
 //        logger.info("********** ReceiveMessageRequest: "+ receiveMessageRequest.toString() + "**********");
         List<Message> receivedMessageList = sqsClient.receiveMessage(queueUrl).getMessages();
-        logger.info("********** Message List: "+ receivedMessageList.toString() + "**********");
         for(Message message : receivedMessageList) {
             if (message.getBody()!= null && !message.getBody().isEmpty()) {
                 logger.info("********** Receiving message" + message.getBody() + " **********");
