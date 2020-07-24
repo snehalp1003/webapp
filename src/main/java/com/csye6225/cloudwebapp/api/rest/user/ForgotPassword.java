@@ -51,7 +51,7 @@ public class ForgotPassword {
             @ApiResponse(code = 500, message = "Internal error, not able to perform the operation.") })
     // Specific method to send password reset link
     public ResponseEntity forgotPassword(@PathVariable(value = "userEmailAddress") String userEmailAddress)
-            throws IOException, InterruptedException {
+            throws IOException {
 
         User user = userRepository.findByUserEmailAddress(userEmailAddress);
         if (user != null && UtilityService.checkStringNotNull(userEmailAddress)) {
