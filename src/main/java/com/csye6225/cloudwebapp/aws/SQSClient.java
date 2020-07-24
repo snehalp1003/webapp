@@ -51,7 +51,7 @@ public class SQSClient {
                 .withCredentials(DefaultAWSCredentialsProviderChain.getInstance()).build();
     }
     
-    public void sendEmail(String userEmail, String token) {
+    public void sendEmail(String userEmail, String token) throws InterruptedException {
         try {
             receiveMessageAndDelete();
             CreateQueueResult create_result = sqsClient.createQueue(sqsQueue);
@@ -65,6 +65,7 @@ public class SQSClient {
                     .withQueueUrl(queueUrl).withMessageBody(messageString.toString());
             sqsClient.sendMessage(messageRequest);
             logger.info("********** Message added in queue **********");
+            Thread.sleep(5000);
             receiveMessageAndDelete();
         } catch (AmazonSQSException exception) {
             if (!exception.getErrorCode().equals("********** The queue already exists **********" )) {
