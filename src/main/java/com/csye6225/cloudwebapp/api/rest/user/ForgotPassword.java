@@ -58,7 +58,6 @@ public class ForgotPassword {
             String generateToken = UUID.randomUUID().toString();
             sqsClient.sendEmail(userEmailAddress, generateToken);
             return new ResponseEntity(user, HttpStatus.OK);
-
         } else {
             return new ResponseEntity("User not found !", HttpStatus.NOT_FOUND);
         }

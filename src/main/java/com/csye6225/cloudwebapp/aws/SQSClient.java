@@ -21,6 +21,7 @@ import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.amazonaws.services.sqs.model.AmazonSQSException;
 import com.amazonaws.services.sqs.model.CreateQueueResult;
 import com.amazonaws.services.sqs.model.Message;
+import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 
 /**
@@ -63,6 +64,7 @@ public class SQSClient {
             SendMessageRequest messageRequest = new SendMessageRequest()
                     .withQueueUrl(queueUrl).withMessageBody(messageString.toString());
             sqsClient.sendMessage(messageRequest);
+            logger.info("********** Message added in queue **********");
             receiveMessageAndDelete();
         } catch (AmazonSQSException exception) {
             if (!exception.getErrorCode().equals("********** The queue already exists **********" )) {
@@ -76,7 +78,10 @@ public class SQSClient {
     public void receiveMessageAndDelete() {
         logger.info("********** Inside receiveMessageAndDelete method **********");
         String queueUrl = sqsClient.getQueueUrl(sqsQueue).getQueueUrl();
-        List<Message> receivedMessageList = sqsClient.receiveMessage(sqsClient.getQueueUrl(sqsQueue).getQueueUrl()).getMessages();
+        final ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(queueUrl).withMaxNumberOfMessages(1);
+        logger.info("********** ReceiveMessageRequest: "+ receiveMessageRequest.toString() + "**********");
+        List<Message> receivedMessageList = sqsClient.receiveMessage(receiveMessageRequest).getMessages();
+        logger.info("********** Message List: "+ receivedMessageList.toString() + "**********");
         for(Message message : receivedMessageList) {
             if (message.getBody()!= null && !message.getBody().isEmpty()) {
                 logger.info("********** Receiving message" + message.getBody() + " **********");
