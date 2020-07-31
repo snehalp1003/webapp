@@ -60,7 +60,7 @@ public class SQSClient {
             String queueUrl = sqsClient.getQueueUrl(sqsQueue).getQueueUrl();
             StringBuilder messageString = new StringBuilder();
             messageString.append(userEmail + ",");
-            messageString.append("http://" + domainName + "/reset?email="+ userEmail + "&token=" + token);
+            messageString.append("https://" + domainName + "/reset?email="+ userEmail + "&token=" + token);
             messageString.append(",");
             logger.info("********** Pushed message to queue with key : " + userEmail + " and token : " + messageString.toString() + "**********");
             SendMessageRequest messageRequest = new SendMessageRequest()
